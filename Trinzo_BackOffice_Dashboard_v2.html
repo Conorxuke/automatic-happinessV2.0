@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trinzo — Back-office Control Surface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN SYSTEM — navy/turquoise, Roboto (§2)
+   ============================================================ */
+:root{
+  --navy:#01163B; --navy-soft:#1b2f55; --turq:#17D0C4; --turq-tint:#e3faf8;
+  --slate:#607382; --grey:#E0E3E7; --grey-tint:#f3f5f7;
+  --ink:#0c1320; --ink-soft:#3d4654; --ink-faint:#7d8794;
+  --green:#198754; --green-tint:#e4f2eb;
+  --amber:#9a6b00; --amber-tint:#f6eed8;
+  --red:#b3261e;   --red-tint:#f7e4e2;
+  --navy-tint:#e6eaf1;
+  --shadow:0 1px 3px rgba(1,22,59,.08),0 1px 2px rgba(1,22,59,.06);
+  --shadow-lg:0 10px 40px rgba(1,22,59,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Roboto',system-ui,sans-serif;color:var(--ink);background:var(--grey-tint);font-size:14px;line-height:1.5}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff;display:flex;align-items:center;
+  gap:18px;padding:0 22px;height:60px;box-shadow:0 2px 10px rgba(1,22,59,.25)}
+.logo{display:flex;align-items:center;gap:11px;font-weight:700;font-size:17px;letter-spacing:.3px}
+.logo .mark{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--turq),#0fa79d);
+  display:grid;place-items:center;color:var(--navy);font-weight:700;font-size:16px}
+.tagline{color:#9fb0cc;font-size:12.5px;font-weight:400;border-left:1px solid #2b426b;padding-left:16px}
+.role-switch{margin-left:auto;display:flex;align-items:center;gap:10px}
+.role-switch label{font-size:11px;color:#9fb0cc;text-transform:uppercase;letter-spacing:.6px}
+.role-switch select{background:var(--navy-soft);color:#fff;border:1px solid #2b426b;border-radius:7px;
+  padding:8px 11px;font-size:13px;font-weight:500;min-width:210px}
+.role-note{font-size:11.5px;color:#9fb0cc;max-width:210px;line-height:1.35}
+
+/* APP LAYOUT */
+.app{display:flex;align-items:stretch;min-height:calc(100vh - 60px)}
+nav.sidebar{width:226px;flex:0 0 226px;background:var(--navy);color:#c9d4e6;padding:14px 10px 40px;
+  position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto}
+nav.sidebar .nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;
+  font-size:13.5px;font-weight:500;color:#c9d4e6;margin-bottom:2px;position:relative;transition:background .12s}
+nav.sidebar .nav-item:hover{background:var(--navy-soft)}
+nav.sidebar .nav-item.active{background:var(--turq);color:var(--navy);font-weight:700}
+nav.sidebar .nav-item .ni-ico{width:17px;text-align:center;font-size:14px;opacity:.85}
+nav.sidebar .nav-item.active .ni-ico{opacity:1}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-weight:700;border-radius:11px;
+  min-width:19px;height:19px;padding:0 6px;display:grid;place-items:center;line-height:1}
+.nav-item.active .nav-badge{background:var(--navy);color:#fff}
+.nav-badge.warn{background:var(--amber)}
+.nav-sec{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#607b9e;
+  padding:14px 12px 6px;font-weight:700}
+
+main{flex:1;padding:26px 30px 60px;max-width:1180px;width:100%;margin:0 auto}
+.page-head{margin-bottom:20px}
+.page-head h1{font-size:23px;font-weight:700;color:var(--navy);letter-spacing:-.2px}
+.page-head p{color:var(--ink-soft);font-size:13.5px;margin-top:4px;max-width:720px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--grey);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h2{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.card h2 .sub{font-weight:400;color:var(--ink-faint);font-size:12.5px}
+.card .card-desc{color:var(--ink-soft);font-size:12.5px;margin-bottom:14px}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;border-radius:20px;
+  padding:3px 10px;letter-spacing:.2px;white-space:nowrap;border:1px solid transparent}
+.chip.extract{background:var(--navy-tint);color:var(--navy)}
+.chip.draft{background:var(--turq-tint);color:#0b6b64}
+.chip.audit{background:var(--amber-tint);color:var(--amber)}
+.chip.retrieve{background:var(--grey-tint);color:var(--slate);border-color:var(--grey)}
+.chip.green{background:var(--green-tint);color:var(--green)}
+.chip.amber{background:var(--amber-tint);color:var(--amber)}
+.chip.red{background:var(--red-tint);color:var(--red)}
+.chip.navy{background:var(--navy-tint);color:var(--navy)}
+.chip.class-lead{background:var(--green-tint);color:var(--green)}
+.chip.class-assist{background:var(--amber-tint);color:var(--amber)}
+.chip.class-excluded{background:var(--red-tint);color:var(--red)}
+.chip.ghost{background:transparent;border-color:var(--grey);color:var(--slate)}
+
+/* STAT TILES (§2) */
+.stat{background:#fff;border:1px solid var(--grey);border-radius:12px;padding:16px 16px 14px;box-shadow:var(--shadow)}
+.stat .label{font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat .value{font-size:28px;font-weight:700;color:var(--navy);margin:4px 0 2px;line-height:1.05}
+.stat .value.small{font-size:22px}
+.stat .foot{font-size:11.5px;color:var(--ink-soft)}
+.stat.hero{border-top:3px solid var(--turq)}
+.stat.secondary{background:var(--grey-tint);box-shadow:none;opacity:.92}
+.stat.secondary .value{font-size:20px;color:var(--slate)}
+.stat.secondary .label{color:var(--ink-faint)}
+.stat.danger{border-top:3px solid var(--red)}
+.stat.good{border-top:3px solid var(--green)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid transparent;border-radius:8px;
+  padding:9px 15px;font-size:13px;font-weight:600;transition:filter .12s,background .12s;line-height:1}
+.btn:hover{filter:brightness(.95)}
+.btn.primary{background:var(--navy);color:#fff}
+.btn.turq{background:var(--turq);color:var(--navy)}
+.btn.ghost{background:#fff;border-color:var(--grey);color:var(--ink-soft)}
+.btn.ghost:hover{background:var(--grey-tint)}
+.btn.danger{background:var(--red);color:#fff}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--navy);color:#fff;text-align:left;padding:9px 12px;font-weight:600;font-size:12px;
+  letter-spacing:.3px;position:sticky;top:0}
+th:first-child{border-top-left-radius:8px}th:last-child{border-top-right-radius:8px}
+tbody td{padding:9px 12px;border-bottom:1px solid var(--grey);vertical-align:top}
+tbody tr:hover{background:var(--grey-tint)}
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--grey)}
+
+/* FILTER BAR */
+.filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:16px}
+.filterbar .fb-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-faint);font-weight:600;margin-right:2px}
+.fpill{border:1px solid var(--grey);background:#fff;border-radius:20px;padding:6px 13px;font-size:12.5px;
+  font-weight:500;color:var(--ink-soft)}
+.fpill.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.fpill.eng.active{background:var(--turq);color:var(--navy);border-color:var(--turq)}
+
+/* QUEUE ITEM CARDS */
+.qgroup-title{font-size:13px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.6px;
+  margin:22px 0 10px;display:flex;align-items:center;gap:9px}
+.qgroup-title .cnt{background:var(--navy-tint);color:var(--navy);border-radius:11px;font-size:11px;padding:1px 9px}
+.qitem{background:#fff;border:1px solid var(--grey);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);
+  margin-bottom:13px;transition:opacity .35s,transform .35s}
+.qitem.flagged{border-left:4px solid var(--amber)}
+.qitem.excl{border-left:4px solid var(--red)}
+.qitem.removing{opacity:0;transform:translateX(40px)}
+.qmeta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:9px}
+.qitem h3{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.qbody{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.caveat{background:var(--amber-tint);color:var(--amber);border-radius:8px;padding:8px 12px;font-size:12.5px;
+  font-weight:500;margin-bottom:10px;display:flex;gap:8px}
+.routing{background:var(--grey-tint);border-radius:8px;padding:8px 12px;font-size:12.5px;color:var(--ink-soft);margin-bottom:10px}
+.routing b{color:var(--navy)}
+.prov{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--ink-faint);background:var(--grey-tint);
+  border-radius:6px;padding:7px 10px;margin-bottom:10px;line-height:1.6;word-break:break-word}
+.verified{color:var(--green);font-weight:600}
+.frame-box{background:var(--turq-tint);border:1px solid #b6ede9;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12.5px}
+.frame-box .ttl{font-weight:700;color:#0b6b64;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.frame-box .row{margin-bottom:3px}.frame-box .row b{color:var(--navy)}
+.needs-frame{background:var(--navy);color:#fff;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.needs-frame .t{font-weight:700;margin-bottom:3px;font-size:13px}
+.needs-frame .d{font-size:12px;color:#c9d4e6;margin-bottom:9px}
+.trail{font-size:11.5px;color:var(--ink-faint);margin-bottom:10px}
+.trail .step{display:inline-block}
+.gate-artefact{background:#f0f6ff;border-left:3px solid var(--navy);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:10px}
+.gate-artefact .who{font-weight:700;color:var(--navy)}
+.qactions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.audit-flags{margin-bottom:10px}
+.aflag{border:1px solid var(--grey);border-radius:8px;padding:9px 11px;margin-bottom:7px;font-size:12.5px}
+.aflag .claim{font-weight:600;color:var(--ink)}
+.aflag .src{color:var(--ink-faint);font-size:11.5px;margin:3px 0 7px}
+.aflag .fbtns{display:flex;gap:6px;flex-wrap:wrap}
+.aflag-status{font-size:11px;font-weight:700;padding:2px 8px;border-radius:11px}
+.tiny-btn{border:1px solid var(--grey);background:#fff;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink-soft)}
+.tiny-btn.on-valid{background:var(--red);color:#fff;border-color:var(--red)}
+.tiny-btn.on-addressed{background:var(--green);color:#fff;border-color:var(--green)}
+.tiny-btn.on-wrong{background:var(--slate);color:#fff;border-color:var(--slate)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:46px 20px;background:#fff;border:1px dashed var(--grey);border-radius:12px}
+.empty .big{font-size:19px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.empty p{color:var(--ink-soft);font-size:13px}
+
+/* PROCESS CHAINS */
+.chain{background:#fff;border:1px solid var(--grey);border-radius:12px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.chain-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:5px}
+.chain-head h3{font-size:15px;font-weight:700;color:var(--navy)}
+.chain-meta{font-size:11.5px;color:var(--ink-faint)}
+.gate-bar{background:var(--navy);color:#fff;border-radius:8px;padding:9px 13px;font-size:12.5px;margin:12px 0 14px;display:flex;gap:8px}
+.gate-bar .k{color:var(--turq);font-weight:700;white-space:nowrap}
+.steps{display:flex;gap:0;overflow-x:auto;padding-bottom:6px}
+.step{flex:1;min-width:150px;border-radius:9px;padding:11px 12px;margin-right:8px;border:1px solid var(--grey);position:relative}
+.step:last-child{margin-right:0}
+.step.done{background:var(--green-tint);border-color:#bfe3cf}
+.step.active{background:var(--turq-tint);border-color:#a7e8e3}
+.step.blocked{background:var(--red-tint);border-color:#eec2be}
+.step.pending{background:var(--grey-tint)}
+.step .snum{font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.5px}
+.step .sname{font-size:13px;font-weight:700;color:var(--ink);margin:3px 0}
+.step .sowner{font-size:11.5px;color:var(--ink-soft)}
+.step .snote{font-size:11px;color:var(--ink-faint);margin-top:5px;line-height:1.4}
+.step .sstatus{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:6px;display:inline-block}
+.step.done .sstatus{color:var(--green)}.step.active .sstatus{color:#0b6b64}
+.step.blocked .sstatus{color:var(--red)}.step.pending .sstatus{color:var(--ink-faint)}
+
+/* WORKBENCH */
+.wb-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.wb-col{border:1px solid var(--grey);border-radius:12px;padding:16px;background:#fff}
+.wb-col.newv{background:var(--green-tint);border-color:#bfe3cf}
+.wb-col h3{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:11px;display:flex;gap:8px;align-items:center}
+.wb-field{margin-bottom:12px}
+.wb-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-faint);font-weight:700;margin-bottom:4px}
+textarea,input[type=text],select.form{width:100%;border:1px solid var(--grey);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit;color:var(--ink)}
+textarea.mono{font-family:'Roboto Mono',monospace;font-size:12px;line-height:1.6;min-height:120px;resize:vertical}
+.wb-out{background:var(--navy);color:#d7e2f2;border-radius:8px;padding:12px 14px;font-size:12.5px;margin-top:12px;font-family:'Roboto Mono',monospace;line-height:1.6}
+.unverified-tag{display:inline-block;background:var(--amber);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+
+/* PROGRESS BARS */
+.pbar{background:var(--grey);border-radius:20px;height:9px;overflow:hidden;margin-top:5px}
+.pbar > span{display:block;height:100%;background:var(--turq);border-radius:20px}
+.pbar.navy > span{background:var(--navy)}
+
+/* STATUS DOTS */
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+.dot.green{background:var(--green)}.dot.amber{background:var(--amber)}.dot.red{background:var(--red)}
+.dot.grey{background:var(--slate)}.dot.turq{background:var(--turq)}
+.dot.pulse{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* KPI TABS */
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--grey);margin-bottom:18px}
+.tab{padding:9px 15px;font-size:13px;font-weight:600;color:var(--ink-faint);border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--navy);border-bottom-color:var(--turq)}
+
+/* FLAG / ALERT rows */
+.flagrow{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border-radius:9px;margin-bottom:8px;font-size:12.5px}
+.flagrow.warn{background:var(--amber-tint)}
+.flagrow.bad{background:var(--red-tint)}
+.flagrow.ok{background:var(--green-tint)}
+.flagrow .fi{font-size:16px}
+.flagrow .ft{font-weight:700;color:var(--ink)}
+.flagrow .fd{color:var(--ink-soft);margin-top:2px}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(1,22,59,.55);z-index:100;display:none;align-items:flex-start;
+  justify-content:center;padding:40px 16px;overflow-y:auto}
+#modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:620px;width:100%;box-shadow:var(--shadow-lg);animation:pop .18s ease}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--grey);display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.modal-head h2{font-size:17px;font-weight:700;color:var(--navy)}
+.modal-head .x{background:none;border:none;font-size:22px;color:var(--ink-faint);line-height:1}
+.modal-body{padding:20px 22px}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--grey);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.gate-req{background:var(--red-tint);color:var(--red);border-radius:8px;padding:10px 13px;font-size:12.5px;font-weight:600;margin-bottom:16px;display:flex;gap:8px}
+.gate-req.assist{background:var(--amber-tint);color:var(--amber)}
+.gate-req.lead{background:var(--green-tint);color:var(--green)}
+.outcome-opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.outcome-opt{flex:1;min-width:120px;border:1.5px solid var(--grey);border-radius:9px;padding:11px;text-align:left;background:#fff}
+.outcome-opt.sel{border-color:var(--navy);background:var(--navy-tint)}
+.outcome-opt .oname{font-weight:700;font-size:13px;color:var(--navy)}
+.outcome-opt .odesc{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.field-lbl{font-size:12px;font-weight:700;color:var(--ink);margin:12px 0 5px;display:block}
+.field-hint{font-size:11.5px;color:var(--ink-faint);margin-bottom:5px}
+.err{color:var(--red);font-size:12px;font-weight:600;margin-top:6px;display:none}
+.err.show{display:block}
+.checkline{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;margin-top:12px;background:var(--grey-tint);padding:11px;border-radius:8px}
+.checkline input{margin-top:2px}
+
+/* TOAST */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);
+  color:#fff;padding:13px 22px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);
+  z-index:200;opacity:0;transition:transform .3s,opacity .3s;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast .ti{color:var(--turq);margin-right:7px;font-weight:700}
+
+/* CONNECTORS */
+.conn-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid var(--grey);border-radius:9px;margin-bottom:8px}
+.conn-row .cn{font-weight:700;color:var(--ink);min-width:120px}
+.conn-row .cdir{font-size:11px;color:var(--ink-faint);background:var(--grey-tint);padding:2px 8px;border-radius:6px;margin-left:auto}
+
+/* RESPONSIVE */
+@media(max-width:980px){
+  nav.sidebar{position:static;width:100%;flex:none;height:auto;display:flex;flex-wrap:wrap;gap:4px;padding:10px}
+  nav.sidebar .nav-item{margin-bottom:0}
+  .nav-sec{display:none}
+  .app{flex-direction:column}
+  main{padding:20px 16px 50px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .wb-cols{grid-template-columns:1fr}
+  .tagline{display:none}
+  .role-switch{margin-left:0}
+  header{flex-wrap:wrap;height:auto;padding:10px 16px;gap:10px}
+}
+@media(max-width:560px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .role-note{display:none}
+  .role-switch select{min-width:150px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="mark">T</span> Trinzo</div>
+  <div class="tagline">Back-office control surface — verify, don't rubber-stamp</div>
+  <div class="role-switch">
+    <label for="roleSel">Viewing as</label>
+    <select id="roleSel"></select>
+    <div class="role-note" id="roleNote"></div>
+  </div>
+</header>
+<div class="app">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main id="view"></main>
+</div>
+
+<div id="modal-overlay"><div class="modal" id="modal"></div></div>
+<div id="toast"></div>
+
+<script>
+// All data mock; refresh resets state.
+"use strict";
+
+/* ============================================================
+   SECTION 1 — DATA & STATE
+   ============================================================ */
+
+// Six personas — one shared surface filtered per role.
+// FLYWHEEL: three-layer alignment (leadership / middle / frontline see one truth).
+const ROLES = [
+  {key:"coordinator", name:"Aoife",  role:"AI Hub Operations",             focus:"Agent health, adoption, every queue"},
+  {key:"sales",       name:"Conor",  role:"Sales & Marketing",            focus:"Pipeline, proposals, content"},
+  {key:"talent",      name:"Maeve",  role:"Talent Acquisition & Resourcing", focus:"Matching, bench, contractors"},
+  {key:"delivery",    name:"Sarah",  role:"Client Delivery",              focus:"Projects, RAG, SOPs"},
+  {key:"finance",     name:"Liam",   role:"Finance",                      focus:"Margin, EI grant, AR/AP"},
+  {key:"exec",        name:"Adelin", role:"Executive Leadership",         focus:"Plan, sign-offs, portfolio"}
+];
+const roleName = k => (ROLES.find(r=>r.key===k)||{}).name || k;
+const roleLabel = k => { const r = ROLES.find(x=>x.key===k); return r ? r.name+" · "+r.role : k; };
+
+const LINES = ["QA/RA","Staffing","Training","AI","Margin Improvement"];
+const ENGINES = ["extract","draft","audit","retrieve"];
+const ENGINE_LABEL = {extract:"EXTRACT",draft:"DRAFT",audit:"AUDIT",retrieve:"RETRIEVE"};
+
+// Navigation — role-visibility + dynamic badges (§4)
+const NAV = [
+  {page:"today",        label:"Today",                     ico:"◧", roles:"all"},
+  {page:"queue",        label:"Verification queue",        ico:"✓", roles:"all", badge:"queue"},
+  {page:"chains",       label:"Process chains",            ico:"⛓", roles:"all", badge:"chains"},
+  {page:"workbench",    label:"Workbench",                 ico:"⚙", roles:"all"},
+  {page:"kpis",         label:"KPIs & reports",            ico:"▤", roles:"all"},
+  {page:"vmap",         label:"Verifiability map",         ico:"◈", roles:["coordinator","delivery","finance"]},
+  {page:"capability",   label:"Capability & apprenticeship",ico:"◑", roles:["coordinator","delivery","exec"]},
+  {page:"resilience",   label:"Resilience",                ico:"⛨", roles:["coordinator","exec"]},
+  {page:"provenance",   label:"Provenance & cost",         ico:"❖", roles:["coordinator","finance","exec"]},
+  {page:"triggers",     label:"Workflows & triggers",      ico:"⚡", roles:["coordinator"]},
+  {page:"connectors",   label:"SaaS connectors",           ico:"⇄", roles:["coordinator"]},
+  {page:"engines",      label:"Engine configuration",      ico:"◲", roles:["coordinator"]},
+  {page:"settings",     label:"Settings & rules",          ico:"⚑", roles:["coordinator","finance"]}
+];
+
+// ---- Verification queue items ----
+// taskClass derives from the Verifiability map ruling and drives gate strength (§6.1/§6.4).
+let ITEMS = [
+  {id:"i1", group:"Proposals & SOWs", engine:"draft", taskClass:"assist", approver:"sales",
+   line:"Staffing", title:"NovaMed: Discovery Workshop — SOW draft (€30K)",
+   body:"First-draft SOW generated from the discovery-call transcript and the NovaMed brief. Scope, deliverables, and a 4-week timeline drafted. Day 3 of the 5-working-day proposal window.",
+   caveat:"Margin not yet checked — day rate assumed at standard band, not NovaMed-specific.",
+   frame:null,
+   next:{to:"finance", reason:"margin check before it goes to the client"},
+   trail:["DRAFT engine → (awaiting Conor)"],
+   provenance:{engine:"draft",model:"Sonnet",tokens:3120,ts:"20 Jul 09:14",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:38, status:"open"},
+
+  {id:"i2", group:"Proposals & SOWs", engine:"retrieve", taskClass:"assist", approver:"sales",
+   line:"AI", title:"Acme Pharma: POC Factory (€200K) — qualification pack",
+   body:"Retrieved comparable POCs, reference architecture and three prior case studies to support the €200K qualified opportunity. Cited from the internal library.",
+   caveat:null,
+   frame:{question:"Can we credibly deliver a POC factory for Acme in 8 weeks?",
+          constraints:"Reuse ARIA patterns; no new infra spend; GxP-aware",
+          whatGoodLooksLike:"3 comparable wins cited, staffing named, risk on data access flagged"},
+   next:{to:"exec", reason:"CEO approval required above €150K"},
+   trail:["Conor framed the ask → RETRIEVE engine → (awaiting Conor to verify sources)"],
+   provenance:{engine:"retrieve",model:"Sonnet",tokens:2740,ts:"20 Jul 08:50",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:52, status:"open"},
+
+  {id:"i3", group:"CRM hygiene", engine:"extract", taskClass:"lead", approver:"sales",
+   line:"Staffing", title:"Discovery-call transcript → pipeline update",
+   body:"Extracted next-step, deal stage and contact roles from the NovaMed discovery-call transcript. Proposes moving the stage to 'Proposal' and setting a follow-up.",
+   caveat:null, frame:null,
+   next:{to:"sales", reason:"apply to CRM (low-stakes, reversible)"},
+   trail:["EXTRACT engine → (awaiting Conor)"],
+   provenance:{engine:"extract",model:"Haiku",tokens:640,ts:"20 Jul 08:20",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:9, status:"open"},
+
+  {id:"i4", group:"CRM hygiene", engine:"extract", taskClass:"lead", approver:"sales",
+   line:"AI", title:"Inbox → contact enrichment (4 new leads)",
+   body:"Extracted company, role and interest from four inbound emails. Proposes creating 4 lead records.",
+   caveat:null, frame:null,
+   next:{to:"sales", reason:"apply to CRM (low-stakes, reversible)"},
+   trail:["EXTRACT engine → (awaiting Conor)"],
+   provenance:{engine:"extract",model:"Haiku",tokens:520,ts:"20 Jul 07:58",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:12, status:"open"},
+
+  {id:"i5", group:"Content", engine:"draft", taskClass:"assist", approver:"sales",
+   line:"AI", title:"LinkedIn post + newsletter draft — 'AI in regulated industries'",
+   body:"Draft LinkedIn post and matching newsletter section on Trinzo's regulated-AI positioning. Nothing auto-publishes.",
+   caveat:"Tone: this is the third 'revolutionary' this month — house style is measured, not hyperbolic.",
+   frame:null,
+   next:{to:"sales", reason:"tone + factual check before scheduling"},
+   trail:["DRAFT engine → (awaiting Conor)"],
+   provenance:{engine:"draft",model:"Sonnet",tokens:1980,ts:"20 Jul 07:40",verifiedAgainst:null},
+   flagged:true, auditFlags:[], minsSaved:26, status:"open"},
+
+  {id:"i6", group:"Content", engine:"draft", taskClass:"assist", approver:"sales",
+   line:"Training", title:"Case study draft — Olympus training programme",
+   body:"Case study first draft assembled from the Olympus project record and CSAT data. Nothing auto-publishes; client sign-off still required externally.",
+   caveat:null, frame:null,
+   next:{to:"delivery", reason:"factual accuracy check with the delivery lead"},
+   trail:["DRAFT engine → (awaiting Conor)"],
+   provenance:{engine:"draft",model:"Sonnet",tokens:2210,ts:"19 Jul 16:22",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:44, status:"open"},
+
+  {id:"i7", group:"Delivery reports", engine:"draft", taskClass:"assist", approver:"delivery",
+   line:"QA/RA", title:"Bi-weekly RAG report — ARIA · LUCE · Audit Tool",
+   body:"Drafted the client-facing bi-weekly status across ARIA (green), LUCE (amber) and the Audit Tool (red, past SLA). Pulls CSAT, milestones and open risks.",
+   caveat:"Audit Tool is red and past SLA — the draft states this plainly; confirm the recovery date before sending.",
+   frame:null,
+   next:{to:"delivery", reason:"verify RAG calls, then release to clients"},
+   trail:["DRAFT engine → (awaiting Sarah)"],
+   provenance:{engine:"draft",model:"Sonnet",tokens:2960,ts:"20 Jul 09:02",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:41, status:"open"},
+
+  {id:"i8", group:"Delivery reports", engine:"retrieve", taskClass:"assist", approver:"delivery",
+   line:"QA/RA", title:"LUCE pre-sales brief (24h SLA)",
+   body:"Retrieved LUCE background, current amber drivers and upsell context for a pre-sales conversation. Cited from the project library. SLA: 24h.",
+   caveat:null, frame:null,
+   next:{to:"sales", reason:"hand to Conor for the pre-sales call"},
+   trail:["RETRIEVE engine → (awaiting Sarah)"],
+   provenance:{engine:"retrieve",model:"Sonnet",tokens:1640,ts:"20 Jul 08:30",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:33, status:"open"},
+
+  {id:"i9", group:"Delivery reports", engine:"audit", taskClass:"assist", approver:"delivery",
+   line:"QA/RA", title:"Scope-creep guardrail — ARIA sprint 7",
+   body:"AUDIT engine compared the sprint backlog against the signed SOW and surfaced items that look out-of-scope. These are flags for a human, not verdicts.",
+   caveat:null, frame:null,
+   next:{to:"delivery", reason:"classify each flag, then choose an action"},
+   trail:["AUDIT engine → (awaiting Sarah to classify)"],
+   provenance:{engine:"audit",model:"Sonnet",tokens:1450,ts:"20 Jul 08:12",verifiedAgainst:null},
+   flagged:true,
+   auditFlags:[
+     {claim:"'SSO integration' appears in sprint 7 but not in the signed SOW deliverables.", source:"SOW-ARIA §3.2 / Jira ARIA-412", status:"unclassified"},
+     {claim:"'Custom export templates' scope expanded beyond the two agreed.", source:"SOW-ARIA §3.4 / Jira ARIA-457", status:"unclassified"}
+   ],
+   minsSaved:22, status:"open",
+   actions:["Out-of-scope: draft change-control SOW","Absorb margin variance"]},
+
+  {id:"i10", group:"Resourcing", engine:"retrieve", taskClass:"assist", approver:"talent",
+   line:"Staffing", title:"Candidate matching — NovaMed role (87% internal match)",
+   body:"Retrieved the strongest internal matches for the NovaMed requirement. Top candidate 87% on skills + availability. Ranked shortlist of 4 with rationale.",
+   caveat:null, frame:null,
+   next:{to:"talent", reason:"human decision to advance a candidate"},
+   trail:["RETRIEVE engine → (awaiting Maeve)"],
+   provenance:{engine:"retrieve",model:"Sonnet",tokens:1810,ts:"20 Jul 07:30",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:36, status:"open"},
+
+  {id:"i11", group:"Resourcing", engine:"retrieve", taskClass:"assist", approver:"talent",
+   line:"Staffing", title:"Shadow demand forecast — Q4 bench risk",
+   body:"Retrieved pipeline + current allocations to forecast Q4 bench and likely start dates. Flags two roles that need confirmed start dates.",
+   caveat:null, frame:null,
+   next:{to:"sales", reason:"confirm start date on the two flagged roles"},
+   trail:["RETRIEVE engine → (awaiting Maeve)"],
+   provenance:{engine:"retrieve",model:"Haiku",tokens:1120,ts:"19 Jul 15:10",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:28, status:"open"},
+
+  {id:"i12", group:"Month-end close", engine:"audit", taskClass:"excluded", approver:"finance",
+   line:"Margin Improvement", title:"Invoice mismatch — supplier vs PO (€4,180)",
+   body:"AUDIT engine flagged a mismatch between a supplier invoice and the matching PO. Invoice parsing is Phase 2 — for now this is a timeline-based flag only, not a parsed figure.",
+   caveat:"Invoice parsing is Phase 2 — treat the amount as indicative; verify against the source document.",
+   frame:null,
+   next:{to:"finance", reason:"resolve before payment run"},
+   trail:["AUDIT engine → (awaiting Liam)"],
+   provenance:{engine:"audit",model:"Sonnet",tokens:980,ts:"20 Jul 08:05",verifiedAgainst:null},
+   flagged:true,
+   auditFlags:[{claim:"Invoice #SP-2231 total exceeds PO-1187 by ~€4,180.", source:"PO-1187 / Xero bill SP-2231", status:"unclassified"}],
+   minsSaved:18, status:"open"},
+
+  {id:"i13", group:"Month-end close", engine:"audit", taskClass:"assist", approver:"finance",
+   line:"Margin Improvement", title:"Three-way close match — 42 transactions",
+   body:"AUDIT reconciled PO / receipt / invoice for 42 transactions. Matches pass silently; 3 exceptions queued for review. Only the exceptions need you.",
+   caveat:null, frame:null,
+   next:{to:"finance", reason:"clear the 3 exceptions"},
+   trail:["AUDIT engine → (awaiting Liam)"],
+   provenance:{engine:"audit",model:"Haiku",tokens:1340,ts:"20 Jul 07:15",verifiedAgainst:null},
+   flagged:false,
+   auditFlags:[
+     {claim:"Receipt missing for PO-1201 (goods logged, no GRN).", source:"PSOHub GRN log", status:"unclassified"},
+     {claim:"Duplicate invoice suspected: INV-8841 vs INV-8846.", source:"Xero bills", status:"unclassified"},
+     {claim:"FX variance on MoneyCorp settlement > tolerance.", source:"MoneyCorp statement 18 Jul", status:"unclassified"}
+   ],
+   minsSaved:55, status:"open"},
+
+  {id:"i14", group:"Month-end close", engine:"audit", taskClass:"assist", approver:"finance",
+   line:"Margin Improvement", title:"Margin watch — Audit Tool project below floor",
+   body:"AUDIT flagged that the Audit Tool project margin has slipped below the 30% floor this period, driven by overrun on unbilled remediation.",
+   caveat:null, frame:null,
+   next:{to:"delivery", reason:"agree recovery plan or change-control"},
+   trail:["AUDIT engine → (awaiting Liam)"],
+   provenance:{engine:"audit",model:"Sonnet",tokens:1010,ts:"19 Jul 14:40",verifiedAgainst:null},
+   flagged:false,
+   auditFlags:[{claim:"Audit Tool project margin 24% vs 30% floor this period.", source:"Xero project P&L / Settings margin floor", status:"unclassified"}],
+   minsSaved:20, status:"open"},
+
+  {id:"i15", group:"EI / R&D grant evidence", engine:"audit", taskClass:"excluded", approver:"finance",
+   line:"AI", title:"EI grant compliance — R&D evidence pack (batch 1)",
+   body:"AUDIT assembled candidate evidence lines for the EI R&D grant claim and flagged where the required evidence URL is missing. Two-signer; evidence URL mandatory for every line.",
+   caveat:"One evidence line has no source URL — it cannot be signed until the primary source is recorded.",
+   frame:null,
+   next:{to:"exec", reason:"PI sign-off + second signer"},
+   trail:["AUDIT engine → (awaiting Liam, then PI)"],
+   provenance:{engine:"audit",model:"Sonnet",tokens:1560,ts:"20 Jul 06:55",verifiedAgainst:null},
+   flagged:true,
+   auditFlags:[
+     {claim:"Timesheet evidence present for 6 of 7 R&D work packages.", source:"Asana timesheets export", status:"unclassified"},
+     {claim:"WP4 novelty statement has no linked primary source.", source:"(missing)", status:"unclassified"}
+   ],
+   minsSaved:31, status:"open"},
+
+  {id:"i16", group:"EI / R&D grant evidence", engine:"audit", taskClass:"excluded", approver:"finance",
+   line:"AI", title:"EI grant compliance — expenditure reconciliation (batch 2)",
+   body:"AUDIT reconciled claimed R&D expenditure against Xero and Spendesk. Flags one category that may be ineligible.",
+   caveat:"Eligibility is a judgement call — do not sign without confirming against the EI grant guidelines.",
+   frame:null,
+   next:{to:"exec", reason:"PI sign-off + second signer"},
+   trail:["AUDIT engine → (awaiting Liam, then PI)"],
+   provenance:{engine:"audit",model:"Sonnet",tokens:1490,ts:"19 Jul 13:20",verifiedAgainst:null},
+   flagged:false,
+   auditFlags:[
+     {claim:"€12,400 cloud spend claimed as R&D — some may be production hosting.", source:"Spendesk / AWS invoices", status:"unclassified"}
+   ],
+   minsSaved:29, status:"open"},
+
+  {id:"i17", group:"CRM hygiene", engine:"extract", taskClass:"lead", approver:"coordinator",
+   line:"AI", title:"Duplicate account merge suggestions (6)",
+   body:"EXTRACT identified 6 likely duplicate account records. Proposes merges; each is reversible.",
+   caveat:null, frame:null,
+   next:{to:"coordinator", reason:"spot-check then apply"},
+   trail:["EXTRACT engine → (awaiting Aoife)"],
+   provenance:{engine:"extract",model:"Haiku",tokens:410,ts:"20 Jul 06:30",verifiedAgainst:null},
+   flagged:false, auditFlags:[], minsSaved:15, status:"open"}
+];
+
+// ---- Process chains ----
+let CHAINS = [
+  {id:"c1", name:"Sales pipeline → proposal", sop:"SOP-AIS-002", line:"Staffing", instance:"NovaMed Discovery",
+   gate:"Proposals within 5 working days convert ~2×. CEO approval required above €150K.",
+   steps:[
+     {name:"Lead qualified", owner:"Conor", engine:"extract", status:"done", note:"From discovery-call transcript"},
+     {name:"Requirement framed", owner:"Conor", engine:null, status:"done", note:"Question + constraints set (upstream)"},
+     {name:"SOW drafted", owner:"DRAFT engine", engine:"draft", status:"active", note:"Day 3 of 5 — in verification queue"},
+     {name:"Margin check", owner:"Liam", engine:"audit", status:"pending", note:"Gate: human margin sign-off"},
+     {name:"Client send", owner:"Conor", engine:null, status:"pending", note:"Nothing auto-sends"}
+   ]},
+  {id:"c2", name:"SOW-signed → onboarding", sop:"SOP-DEL-011", line:"Staffing", instance:"Acme Pharma",
+   gate:"Onboarding cannot complete until IT access is provisioned by a named human.",
+   steps:[
+     {name:"SOW signed", owner:"Adelin", engine:null, status:"done", note:"Countersigned 15 Jul"},
+     {name:"Project shell created", owner:"EXTRACT engine", engine:"extract", status:"done", note:"PSOHub + Asana scaffolded"},
+     {name:"Kick-off scheduled", owner:"Sarah", engine:null, status:"done", note:""},
+     {name:"Employee account creation", owner:"IT", engine:null, status:"blocked", note:"Blocked — waiting on IT access since Mon"},
+     {name:"Team allocated", owner:"Maeve", engine:"retrieve", status:"pending", note:""}
+   ]},
+  {id:"c3", name:"Month-end close", sop:"SOP-FIN-004", line:"Margin Improvement", instance:"July close",
+   gate:"Finance starts only when every project is PM-Approved. Payments stay human, always.",
+   steps:[
+     {name:"Projects PM-approved", owner:"Sarah", engine:null, status:"active", note:"38 of 41 approved"},
+     {name:"Three-way match", owner:"AUDIT engine", engine:"audit", status:"pending", note:"Matches silent; exceptions queued"},
+     {name:"Exceptions cleared", owner:"Liam", engine:null, status:"pending", note:"Gate: human clears each exception"},
+     {name:"Margin review", owner:"Liam", engine:"audit", status:"pending", note:""},
+     {name:"Books closed", owner:"Liam", engine:null, status:"pending", note:""}
+   ]},
+  {id:"c4", name:"Training content production", sop:"SOP-TRN-007", line:"Training", instance:"Olympus FDA module",
+   gate:"Release requires human verification AND a GxP SME sign-off. Adversarial scores are inputs, never verdicts.",
+   steps:[
+     {name:"Source material framed", owner:"Sarah", engine:null, status:"done", note:"Learning objectives + GxP constraints set"},
+     {name:"Module drafted", owner:"DRAFT engine", engine:"draft", status:"done", note:""},
+     {name:"Adversarial review", owner:"AUDIT engine", engine:"audit", status:"active", note:"Issues surfaced (rubric 5.8 → 7.9) — awaiting human classification"},
+     {name:"GxP SME verification", owner:"Sarah + SME", engine:null, status:"blocked", note:"Gate: cannot pass on score alone"},
+     {name:"Release", owner:"Sarah", engine:null, status:"pending", note:""}
+   ]},
+  {id:"c5", name:"Marketing flywheel", sop:"SOP-MKT-003", line:"AI", instance:"July cadence",
+   gate:"Nothing auto-publishes. Every piece has a named human tone + fact check before scheduling.",
+   steps:[
+     {name:"Theme framed", owner:"Conor", engine:null, status:"done", note:"'AI in regulated industries'"},
+     {name:"Post + newsletter drafted", owner:"DRAFT engine", engine:"draft", status:"active", note:"In verification queue — tone flag raised"},
+     {name:"Tone + fact check", owner:"Conor", engine:null, status:"pending", note:"Gate: human edit required"},
+     {name:"Schedule", owner:"Conor", engine:null, status:"pending", note:"Manual publish"}
+   ]},
+  {id:"c6", name:"Recruiting: requirement → offer", sop:"SOP-TAL-005", line:"Staffing", instance:"NovaMed role",
+   gate:"Decisions to advance a candidate stay human, always. Advert step skipped — internal match found.",
+   steps:[
+     {name:"Requirement framed", owner:"Maeve", engine:null, status:"done", note:"Skills + availability constraints set"},
+     {name:"Internal match", owner:"RETRIEVE engine", engine:"retrieve", status:"done", note:"87% top match — advert skipped"},
+     {name:"Human decision to advance", owner:"Maeve", engine:null, status:"active", note:"Gate: in verification queue"},
+     {name:"Interview", owner:"Maeve", engine:null, status:"pending", note:""},
+     {name:"Offer", owner:"Adelin", engine:null, status:"pending", note:""}
+   ]}
+];
+
+// ---- Projects (RAG) ----
+let PROJECTS = [
+  {name:"ARIA",       rag:"green", csat:4.6, sla:"On track",  note:"Sprint 7 — scope-creep flags open"},
+  {name:"LUCE",       rag:"amber", csat:4.1, sla:"At risk",   note:"Pre-sales upsell in flight"},
+  {name:"Audit Tool", rag:"red",   csat:3.9, sla:"Past SLA",  note:"Recovery plan required; margin below floor"},
+  {name:"Olympus",    rag:"amber", csat:4.2, sla:"At risk",   note:"FDA module in GxP verification"}
+];
+
+// ---- Corrections log (institutional learning + accountability) ----
+let CORRECTIONS = [
+  {date:"20 Jul", agent:"DRAFT — content", type:"Tone softened", by:"Conor", detail:"'revolutionary' softened to 'proven' — third occurrence this month: candidate for prompt update"},
+  {date:"19 Jul", agent:"EXTRACT — CRM",   type:"Wrong owner fixed", by:"Sarah", detail:"Deal owner corrected from auto-assigned to actual AE"},
+  {date:"18 Jul", agent:"DRAFT — RAG report", type:"RAG override", by:"Sarah", detail:"Audit Tool overridden Green → Amber (later Red) — human judgement beat the model's optimism"},
+  {date:"17 Jul", agent:"RETRIEVE — matching", type:"Source removed", by:"Maeve", detail:"Cited an expired availability record; removed before shortlisting"},
+  {date:"16 Jul", agent:"AUDIT — close",    type:"Flag reclassified", by:"Liam", detail:"'Duplicate invoice' flag marked wrong — legitimate split billing"}
+];
+
+// ---- Handoffs log ----
+let HANDOFFS = [
+  {date:"20 Jul 09:20", from:"DRAFT engine", to:"Conor (Sales)", item:"NovaMed SOW draft", outcome:"In verification queue"},
+  {date:"19 Jul 16:40", from:"Sarah (Delivery)", to:"Conor (Sales)", item:"LUCE pre-sales brief", outcome:"Cleared with sources verified"},
+  {date:"19 Jul 11:05", from:"AUDIT engine", to:"Liam (Finance)", item:"Close exceptions ×3", outcome:"2 cleared, 1 reclassified"},
+  {date:"18 Jul 15:10", from:"Maeve (Talent)", to:"Adelin (Exec)", item:"NovaMed candidate advance", outcome:"Decision recorded — advanced to interview"}
+];
+
+// ---- Agent stats ----
+let AGENTSTATS = [
+  {agent:"EXTRACT — CRM hygiene",      runs:214, successPct:97, exceptions:6},
+  {agent:"DRAFT — proposals & content",runs:88,  successPct:91, exceptions:8},
+  {agent:"AUDIT — month-end close",    runs:63,  successPct:94, exceptions:4},
+  {agent:"RETRIEVE — matching & briefs",runs:120,successPct:96, exceptions:5},
+  {agent:"EI Grant Tracker",           runs:7,   successPct:86, exceptions:1}
+];
+
+// ---- Adoption / reviewer integrity → feeds rubber-stamp detector ----
+let ADOPTION = [
+  {person:"Aoife (Coordinator)", cleared:41, avgClearMins:4.8, rejectRate:0.14, oldestQueueMins:35,  flag:null},
+  {person:"Conor (Sales)",       cleared:52, avgClearMins:6.1, rejectRate:0.11, oldestQueueMins:90,  flag:null},
+  {person:"Maeve (Talent)",      cleared:19, avgClearMins:5.2, rejectRate:0.05, oldestQueueMins:610, flag:"Queue ageing — oldest item >10h"},
+  {person:"Sarah (Delivery)",    cleared:37, avgClearMins:7.4, rejectRate:0.19, oldestQueueMins:120, flag:null},
+  {person:"Liam (Finance)",      cleared:44, avgClearMins:5.9, rejectRate:0.16, oldestQueueMins:80,  flag:null},
+  {person:"Adelin (Exec)",       cleared:12, avgClearMins:1.3, rejectRate:0.00, oldestQueueMins:240, flag:"Zero rejections + batches sign-offs weekly + fast clears — gate integrity at risk"}
+];
+
+// ---- Verifiability map ----
+// VERIFIABILITY MAP — Scaffolding/Flywheel: point the tool only at checkable work.
+let VMAP = [
+  {task:"CRM data extraction from transcripts", line:"Staffing", checkability:"high", ruling:"AI leads", why:"Output is checkable at a glance and every change is reversible."},
+  {task:"Duplicate account detection", line:"AI", checkability:"high", ruling:"AI leads", why:"Merges are reversible; spot-checking a sample is cheap."},
+  {task:"Proposal / SOW drafting", line:"Staffing", checkability:"medium", ruling:"AI assists", why:"Scope and commercial terms need a human decision; draft is a starting point."},
+  {task:"Content drafting (LinkedIn / newsletter)", line:"AI", checkability:"medium", ruling:"AI assists", why:"Tone and factual claims need human judgement before publish."},
+  {task:"Candidate matching", line:"Staffing", checkability:"medium", ruling:"AI assists", why:"Ranking is checkable; the decision to advance a person stays human."},
+  {task:"Client RAG status reporting", line:"QA/RA", checkability:"medium", ruling:"AI assists", why:"Status calls are judgement; the draft accelerates but a human owns the RAG."},
+  {task:"Three-way close matching", line:"Margin Improvement", checkability:"medium", ruling:"AI assists", why:"Matches pass silently; exceptions are human-verified."},
+  {task:"Invoice / payment approval", line:"Margin Improvement", checkability:"low", ruling:"AI excluded", why:"High stakes, hard to verify from parsed data; source check mandatory. Payments stay human."},
+  {task:"EI / R&D grant evidence", line:"AI", checkability:"low", ruling:"AI excluded", why:"Eligibility is a regulated judgement; every line needs a primary-source URL and two signers."},
+  {task:"GxP training content release", line:"Training", checkability:"low", ruling:"AI excluded", why:"Regulatory exposure; adversarial score is an input, SME sign-off is the gate."}
+];
+// An item's taskClass is derived from its task ruling here (leads→lead, assists→assist, excluded→excluded).
+
+// ---- Capability (anti-cognitive-rusting layer) ----
+// CAPABILITY — Cognitive Rusting: protect the skill the method consumes; detect deskilling.
+let CAPABILITY = [
+  {task:"SOW margin modelling", unassistedCapable:["Liam"], lastUnassisted:"12 days ago", riskFlag:"Single point of knowledge — only one human can do this unassisted"},
+  {task:"GxP content QA", unassistedCapable:["Sarah","Niamh (junior, in training)"], lastUnassisted:"5 days ago", riskFlag:null},
+  {task:"EI evidence pack assembly", unassistedCapable:["Liam","Adelin"], lastUnassisted:"41 days ago", riskFlag:"No unassisted run in >40 days — skill going stale"},
+  {task:"Client RAG judgement", unassistedCapable:["Sarah","Aoife"], lastUnassisted:"3 days ago", riskFlag:null},
+  {task:"Candidate shortlisting from scratch", unassistedCapable:["Maeve"], lastUnassisted:"28 days ago", riskFlag:"Single point of knowledge; approaching stale threshold"},
+  {task:"Proposal drafting without AI", unassistedCapable:["Conor","Aoife"], lastUnassisted:"9 days ago", riskFlag:null}
+];
+let RECON_SCHEDULE = [
+  {task:"EI evidence pack — unassisted practice run", who:"Liam", when:"Fri 24 Jul", reason:"41 days since last unassisted; keep judgement sharp"},
+  {task:"SOW margin model — pair + cross-train", who:"Aoife shadows Liam", when:"Mon 27 Jul", reason:"Remove single point of knowledge"},
+  {task:"Candidate shortlist — cold run", who:"Maeve", when:"Wed 29 Jul", reason:"Approaching stale threshold"}
+];
+let APPRENTICESHIP = [
+  {task:"Source-tracing EI evidence lines", junior:"Niamh", tracked:"Development — 6 lines traced this week", note:"Verification work routed deliberately to build judgement"},
+  {task:"RAG-report fact checking", junior:"Tom", tracked:"Development — 2 reports checked", note:"Learning what a real red looks like"},
+  {task:"Proposal source verification", junior:"Niamh", tracked:"Development — 4 proposals", note:"Not counted as throughput"}
+];
+
+// ---- Resilience ----
+// RESILIENCE — Cognitive Rusting: map dependency, test degraded mode.
+let RESILIENCE = [
+  {workflow:"Proposal drafting", model:"Sonnet", dependency:"critical", fallback:"Haiku + human editor", fallbackTested:true},
+  {workflow:"Regulatory / GxP summarisation", model:"Opus", dependency:"critical", fallback:"Human at reduced volume", fallbackTested:false},
+  {workflow:"CRM extraction", model:"Haiku", dependency:"moderate", fallback:"Second provider (open-weight)", fallbackTested:true},
+  {workflow:"Candidate matching", model:"Sonnet", dependency:"moderate", fallback:"Manual shortlist from bench sheet", fallbackTested:true},
+  {workflow:"Month-end matching", model:"Haiku", dependency:"moderate", fallback:"Spreadsheet three-way match", fallbackTested:false},
+  {workflow:"EI evidence assembly", model:"Sonnet", dependency:"low", fallback:"Fully manual (as pre-2025)", fallbackTested:true}
+];
+
+// ---- Exec plan ----
+let EXECPLAN = [
+  {metric:"Revenue", target:"€5.0M", progressPct:46},
+  {metric:"Margin", target:"33%", progressPct:38},
+  {metric:"Caught-before-client", target:"95% of issues", progressPct:88},
+  {metric:"Skill resilience (tested fallbacks)", target:"100%", progressPct:67}
+];
+
+// ---- Triggers / workflows ----
+let SURVEYS = [
+  {id:"t1", name:"Leadership pulse survey", status:"scheduled", cadence:"Monthly", checkpoint:"Results reviewed by Exec before any resourcing action", cascade:"→ resourcing task routed to Talent (Maeve) for review — not auto-actioned"},
+  {id:"t2", name:"Client CSAT trigger", status:"live", cadence:"On milestone", checkpoint:"Any score < 4 routes to Delivery lead before client sees follow-up", cascade:"→ RAG re-check drafted for human confirmation"},
+  {id:"t3", name:"Bench-risk watcher", status:"in-flight", cadence:"Weekly", checkpoint:"Forecast reviewed by Talent before sales is notified", cascade:"→ 'confirm start date' task to Sales"},
+  {id:"t4", name:"Margin-floor alarm", status:"live", cadence:"Continuous", checkpoint:"Below-floor projects queued to Finance; no auto-adjustment", cascade:"→ margin-watch item in verification queue"},
+  {id:"t5", name:"Proposal SLA timer", status:"manual", cadence:"Per opportunity", checkpoint:"Reminder only; human owns the send", cascade:"→ nudge to owning AE at day 4 of 5"}
+];
+
+// ---- SaaS connectors ----
+let CONNECTORS = [
+  {name:"Xero",       status:"green", dir:"read/write"},
+  {name:"PSOHub",     status:"green", dir:"read/write"},
+  {name:"Salesforce", status:"green", dir:"read/write"},
+  {name:"SharePoint", status:"green", dir:"read"},
+  {name:"Asana",      status:"green", dir:"read/write"},
+  {name:"Spendesk",   status:"amber", dir:"read"},
+  {name:"BOI",        status:"green", dir:"read"},
+  {name:"MoneyCorp",  status:"amber", dir:"read"},
+  {name:"Gamma",      status:"green", dir:"write"}
+];
+
+// ---- Engine config ----
+let ENGINE_CONFIG = [
+  {engine:"extract", desc:"Unstructured → structured. Default task class: LEAD.", defClass:"lead", model:"Haiku", gates:"Spot-check sample on batch clear"},
+  {engine:"draft",   desc:"Context → first draft. Default task class: ASSIST.", defClass:"assist", model:"Sonnet", gates:"Frame-it-first; human decide/reject/constrain/reframe"},
+  {engine:"audit",   desc:"Content vs a ruleset → flags, not verdicts.", defClass:"assist", model:"Sonnet", gates:"Human classifies every flag; excluded for payments/GxP/EI"},
+  {engine:"retrieve",desc:"Answer from a library, cited.", defClass:"assist", model:"Sonnet", gates:"Human verifies cited sources"}
+];
+
+// ---- Settings thresholds ----
+let SETTINGS = {
+  marginFloor:"30%",
+  slaProposal:"5 working days",
+  slaPresales:"24 hours",
+  gateDefaultLead:"Spot-check + tick",
+  gateDefaultAssist:"Decide / Reject / Constrain / Reframe (free-text required)",
+  gateDefaultExcluded:"Rationale (≥15 words) + primary-source check",
+  rubberStampMinReject:"Flag if reject rate < 3%",
+  rubberStampMinMins:"Flag if avg clear time < 2.0 min",
+  queueAgeAlert:"Flag if oldest item > 8 h"
+};
+
+// ---- STATE ----
+let state = {
+  role: "coordinator",
+  page: "today",
+  filters: { line:"all", engine:"all" },
+  kpiTab: "Company",
+  // gate modal working memory
+  gate: { itemId:null, outcome:null }
+};
+
+/* ============================================================
+   SECTION 2 — ACTIONS & LOGIC
+   ============================================================ */
+
+function switchRole(key){
+  state.role = key;
+  // If the current page isn't visible to this role, fall back to Today.
+  const nav = NAV.find(n=>n.page===state.page);
+  if(nav && nav.roles!=="all" && !nav.roles.includes(key)) state.page="today";
+  render();
+}
+function go(page){ state.page = page; window.scrollTo(0,0); render(); }
+function applyFilter(kind,val){ state.filters[kind]=val; render(); }
+function kpiTab(name){ state.kpiTab=name; render(); }
+
+function navVisible(n){ return n.roles==="all" || n.roles.includes(state.role); }
+
+// Open items relevant to the current role (for badges + Today)
+function openItemsForRole(){
+  return ITEMS.filter(i=>i.status==="open" && i.approver===state.role);
+}
+function openItemsAll(){ return ITEMS.filter(i=>i.status==="open"); }
+function blockedStepCount(){
+  let n=0; CHAINS.forEach(c=>c.steps.forEach(s=>{if(s.status==="blocked")n++;})); return n;
+}
+
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerHTML='<span class="ti">✓</span>'+msg;
+  t.classList.add("show");
+  clearTimeout(t._to);
+  t._to=setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+function openModal(html){
+  document.getElementById("modal").innerHTML=html;
+  document.getElementById("modal-overlay").classList.add("open");
+}
+function closeModal(){ document.getElementById("modal-overlay").classList.remove("open"); state.gate={itemId:null,outcome:null}; }
+
+// ---- UPSTREAM FRAMING ----
+// UPSTREAM — Cognitive Rusting: human as architect of the filter, not reviewer of output they didn't shape.
+function frameItem(itemId){
+  const it=ITEMS.find(i=>i.id===itemId);
+  openModal(`
+    <div class="modal-head">
+      <div><h2>Frame it first</h2>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">
+        Before you see the machine's draft, set the brief. You are the architect of the filter — not a reviewer of output you didn't shape.</div></div>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-lbl">The question you're actually asking</label>
+      <input type="text" id="f-q" placeholder="e.g. Can we deliver this scope profitably in 4 weeks?">
+      <label class="field-lbl">Constraints the answer must respect</label>
+      <input type="text" id="f-c" placeholder="e.g. standard day rate; GxP-aware; no new infra spend">
+      <label class="field-lbl">What good looks like</label>
+      <input type="text" id="f-g" placeholder="e.g. named risks, cited comparables, explicit assumptions">
+      <div class="err" id="f-err">Set all three before continuing.</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn turq" onclick="saveFrame('${itemId}')">Save frame &amp; reveal draft</button>
+    </div>`);
+}
+function saveFrame(itemId){
+  const q=document.getElementById("f-q").value.trim();
+  const c=document.getElementById("f-c").value.trim();
+  const g=document.getElementById("f-g").value.trim();
+  if(!q||!c||!g){ document.getElementById("f-err").classList.add("show"); return; }
+  const it=ITEMS.find(i=>i.id===itemId);
+  it.frame={question:q,constraints:c,whatGoodLooksLike:g};
+  it.trail.unshift(roleName(state.role)+" framed the ask (upstream)");
+  closeModal(); render(); toast("Frame saved — draft revealed. You shaped the filter first.");
+}
+
+// ---- AUDIT flag classification (no AI-verifies-AI) ----
+function classifyAuditFlag(itemId,flagIdx,status){
+  const it=ITEMS.find(i=>i.id===itemId);
+  it.auditFlags[flagIdx].status=status;
+  render();
+}
+
+// ---- THE REAL GATE ----
+// REAL GATE — Scaffolding: passing requires human-generated output, not a click.
+function openGate(itemId){
+  const it=ITEMS.find(i=>i.id===itemId);
+  // assist/excluded must be framed first
+  if((it.taskClass==="assist"||it.taskClass==="excluded") && !it.frame){
+    toast("Frame it first — set the brief before acting on the draft.");
+    return;
+  }
+  state.gate={itemId,outcome:null};
+  if(it.taskClass==="excluded") return gateExcluded(it);
+  if(it.taskClass==="assist")   return gateAssist(it);
+  return gateLead(it);
+}
+
+// EXCLUDED — high stakes: outcome + rationale(≥15 words) + primary-source check.
+function gateExcluded(it){
+  openModal(`
+    <div class="modal-head">
+      <div><h2>Verification gate — high-stakes</h2>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">${it.title}</div></div>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="gate-req">⛔ This task is <b style="margin:0 3px">AI-excluded</b>. It cannot be cleared without a decision, a substantive rationale, and a recorded primary-source check. AI may never auto-clear this.</div>
+      <label class="field-lbl">Outcome</label>
+      <div class="outcome-opts" id="g-opts">
+        ${["Accept with evidence","Reject","Escalate"].map(o=>`<button class="outcome-opt" data-o="${o}" onclick="pickOutcome(this)"><span class="oname">${o}</span></button>`).join("")}
+      </div>
+      <label class="field-lbl">Substantive rationale <span style="color:var(--ink-faint);font-weight:400">(min ~15 words)</span></label>
+      <textarea id="g-rat" rows="3" placeholder="What did you check, what did you conclude, and what are you accepting?"></textarea>
+      <label class="field-lbl">Primary-source check <span style="color:var(--ink-faint);font-weight:400">(URL or document + section)</span></label>
+      <input type="text" id="g-src" placeholder="e.g. https://…/EI-grant-guidelines §4.2  — or  SOW-ARIA §3.2">
+      <div class="err" id="g-err"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="submitExcluded('${it.id}')">Record verification &amp; clear</button>
+    </div>`);
+}
+function pickOutcome(btn){
+  document.querySelectorAll("#g-opts .outcome-opt").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel");
+  state.gate.outcome=btn.getAttribute("data-o");
+}
+function submitExcluded(itemId){
+  const it=ITEMS.find(i=>i.id===itemId);
+  const rat=document.getElementById("g-rat").value.trim();
+  const src=document.getElementById("g-src").value.trim();
+  const err=document.getElementById("g-err");
+  const words=rat.split(/\s+/).filter(Boolean).length;
+  if(!state.gate.outcome){ err.textContent="Select an outcome."; err.classList.add("show"); return; }
+  if(words<15){ err.textContent="Rationale must be substantive (≥15 words). You've written "+words+"."; err.classList.add("show"); return; }
+  if(!src){ err.textContent="A primary-source check is mandatory for high-stakes work."; err.classList.add("show"); return; }
+  // GATE ARTEFACT — Scaffolding: the record that makes handover trustworthy.
+  const artefact={who:roleName(state.role), outcome:state.gate.outcome, text:rat, source:src};
+  it.provenance.verifiedAgainst=src; // verified against source by named human
+  if(state.gate.outcome==="Reject"){ finishReject(it,artefact); }
+  else { finishClear(it,artefact,"verified against source"); }
+}
+
+// ASSIST — Decide / Reject / Constrain / Reframe, free-text required.
+function gateAssist(it){
+  const opts=[
+    {o:"Decide",   d:"State the decision + the one assumption you're accepting"},
+    {o:"Reject",   d:"Give the reason it can't go forward"},
+    {o:"Constrain",d:"Add a rule or edit the machine must respect"},
+    {o:"Reframe",  d:"Rewrite the ask itself"}
+  ];
+  openModal(`
+    <div class="modal-head">
+      <div><h2>Verification gate — collaboration</h2>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">${it.title}</div></div>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="gate-req assist">✎ This task is <b style="margin:0 3px">AI-assisted</b>. Advancing it requires you to produce something the machine did not — a decision, rejection, constraint, or reframing. No bare approval.</div>
+      <label class="field-lbl">Your move</label>
+      <div class="outcome-opts" id="g-opts">
+        ${opts.map(o=>`<button class="outcome-opt" data-o="${o.o}" onclick="pickOutcome(this)"><span class="oname">${o.o}</span><span class="odesc">${o.d}</span></button>`).join("")}
+      </div>
+      <label class="field-lbl" id="g-lbl">What you're producing</label>
+      <textarea id="g-rat" rows="3" placeholder="Type the decision, reason, constraint or reframing…"></textarea>
+      <div class="err" id="g-err"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="submitAssist('${it.id}')">Record &amp; route</button>
+    </div>`);
+}
+function submitAssist(itemId){
+  const it=ITEMS.find(i=>i.id===itemId);
+  const rat=document.getElementById("g-rat").value.trim();
+  const err=document.getElementById("g-err");
+  const words=rat.split(/\s+/).filter(Boolean).length;
+  if(!state.gate.outcome){ err.textContent="Pick your move first."; err.classList.add("show"); return; }
+  if(words<3){ err.textContent="This needs real input — a one-word answer isn't a gate."; err.classList.add("show"); return; }
+  const artefact={who:roleName(state.role), outcome:state.gate.outcome, text:rat, source:null};
+  if(state.gate.outcome==="Reject"){ finishReject(it,artefact); }
+  else { finishClear(it,artefact,null); }
+}
+
+// LEAD — fully automatable; quick clear, spot-check tick required.
+function gateLead(it){
+  openModal(`
+    <div class="modal-head">
+      <div><h2>Clear — automatable task</h2>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">${it.title}</div></div>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="gate-req lead">✓ This task is <b style="margin:0 3px">AI-led</b> (errors are cheap and catchable). It may be cleared quickly — but confirm you eyeballed the result.</div>
+      <div class="checkline"><input type="checkbox" id="g-spot"><label for="g-spot">I spot-checked the output and it looks right.</label></div>
+      <div class="err" id="g-err"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn turq" onclick="submitLead('${it.id}')">Clear</button>
+    </div>`);
+}
+function submitLead(itemId){
+  const it=ITEMS.find(i=>i.id===itemId);
+  if(!document.getElementById("g-spot").checked){
+    document.getElementById("g-err").textContent="Tick the spot-check — even automatable work gets a glance.";
+    document.getElementById("g-err").classList.add("show"); return;
+  }
+  const artefact={who:roleName(state.role), outcome:"Cleared (spot-checked)", text:"Spot-checked; output correct.", source:null};
+  finishClear(it,artefact,null);
+}
+
+// Batch clear — ONLY lead-class, records spot-check tick.
+function batchClearLead(){
+  const leads=visibleItems().filter(i=>i.taskClass==="lead");
+  if(!leads.length){ toast("No automatable items to batch-clear."); return; }
+  openModal(`
+    <div class="modal-head"><div><h2>Batch clear — automatable only</h2>
+    <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">${leads.length} AI-led items in view</div></div>
+    <button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-body">
+      <div class="gate-req lead">Only AI-led items can be batch-cleared. Assist and excluded items always require individual, produced input.</div>
+      <div class="checkline"><input type="checkbox" id="b-spot"><label for="b-spot">I spot-checked a sample of these ${leads.length} items and they look right.</label></div>
+      <div class="err" id="b-err"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn turq" onclick="doBatchClear()">Clear ${leads.length}</button>
+    </div>`);
+}
+function doBatchClear(){
+  if(!document.getElementById("b-spot").checked){
+    document.getElementById("b-err").textContent="Tick the spot-check first.";
+    document.getElementById("b-err").classList.add("show"); return;
+  }
+  const leads=visibleItems().filter(i=>i.taskClass==="lead");
+  const sample=Math.max(1,Math.ceil(leads.length/2));
+  leads.forEach(it=>{
+    it.status="cleared";
+    it.trail.push("Cleared by "+roleName(state.role)+" (batch, spot-checked "+sample+" of "+leads.length+")");
+    HANDOFFS.unshift({date:"20 Jul (now)",from:roleName(state.role),to:it.next.to==="sales"?"Sales":it.next.to,item:it.title,outcome:"Batch cleared — spot-checked"});
+  });
+  bumpReviewer(1.2,false);
+  closeModal(); render(); toast("Batch cleared "+leads.length+" automatable items — spot-checked "+sample+" of "+leads.length+".");
+}
+
+// Shared clear/reject finishers
+function finishClear(it,artefact,verifiedNote){
+  // GATE ARTEFACT travels with the routing to next.to
+  const line = artefact.who+" — "+artefact.outcome+(verifiedNote?" ("+verifiedNote+")":"")+": “"+artefact.text+"”";
+  it.trail.push(line);
+  it.gateArtefact=artefact;
+  it.status="cleared";
+  HANDOFFS.unshift({date:"20 Jul (now)",from:roleName(state.role),to:routeLabel(it.next.to),item:it.title,outcome:"Cleared — artefact carried to "+routeLabel(it.next.to)});
+  // rubber-stamp signal: measure how fast/empty (accept, but record)
+  bumpReviewer(artefact.text.split(/\s+/).length<4?1.0:6.5, artefact.outcome==="Reject");
+  animateOut(it.id,()=>{
+    render();
+    toast(it.taskClass==="excluded"
+      ? "Cleared — verified against "+artefact.source+". Artefact routed to "+routeLabel(it.next.to)+"."
+      : "Cleared — your "+artefact.outcome.toLowerCase()+" is now travelling to "+routeLabel(it.next.to)+".");
+  });
+}
+function finishReject(it,artefact){
+  it.trail.push(artefact.who+" — REJECTED: “"+artefact.text+"”");
+  it.gateArtefact=artefact;
+  it.status="rejected";
+  CORRECTIONS.unshift({date:"20 Jul",agent:it.provenance.engine.toUpperCase()+" — "+it.group,type:"Rejected at gate",by:artefact.who,detail:artefact.text});
+  HANDOFFS.unshift({date:"20 Jul (now)",from:artefact.who,to:it.provenance.engine.toUpperCase()+" engine",item:it.title,outcome:"Rejected — reason logged as learning"});
+  bumpReviewer(6.5,true);
+  animateOut(it.id,()=>{ render(); toast("Rejected — reason captured as institutional learning."); });
+}
+function routeLabel(k){ const r=ROLES.find(x=>x.key===k); return r? r.name+" ("+r.role.split(" ")[0]+")" : k; }
+
+function bumpReviewer(mins,rejected){
+  const key = ROLES.find(r=>r.key===state.role);
+  const row = ADOPTION.find(a=>a.person.startsWith(key.name));
+  if(!row) return;
+  const prev=row.cleared;
+  row.cleared+=1;
+  row.avgClearMins=+(((row.avgClearMins*prev)+mins)/row.cleared).toFixed(1);
+  row.rejectRate=+((row.rejectRate*prev+(rejected?1:0))/row.cleared).toFixed(2);
+  recomputeStampFlags();
+}
+// RUBBER-STAMP DETECTOR — Cognitive Rusting: a gate nobody fails isn't a gate.
+function recomputeStampFlags(){
+  ADOPTION.forEach(a=>{
+    const flags=[];
+    if(a.rejectRate<0.03) flags.push("Zero/near-zero rejections");
+    if(a.avgClearMins<2.0) flags.push("Implausibly fast clears ("+a.avgClearMins+" min)");
+    if(a.oldestQueueMins>480) flags.push("Queue ageing ("+Math.round(a.oldestQueueMins/60)+"h oldest)");
+    a.flag = flags.length? flags.join(" · ") : null;
+  });
+}
+
+function animateOut(id,cb){
+  const el=document.querySelector('[data-item="'+id+'"]');
+  if(el){ el.classList.add("removing"); setTimeout(cb,340); } else cb();
+}
+
+// ---- Triggers (simulated) ----
+function fireTrigger(id){
+  const s=SURVEYS.find(x=>x.id===id);
+  const prev=s.status; s.status="in-flight"; render();
+  // simulate in-flight then result (no timers persisting state issues — short)
+  setTimeout(()=>{ s.status = prev==="in-flight"?"live":prev; render(); toast(s.name+" fired — cascade queued for a human checkpoint, nothing auto-published."); },1400);
+}
+
+// visible items respecting filters (for current role's queue)
+function visibleItems(){
+  return openItemsForRole().filter(i=>
+    (state.filters.line==="all"||i.line===state.filters.line) &&
+    (state.filters.engine==="all"||i.engine===state.filters.engine));
+}
+
+/* ============================================================
+   SECTION 3 — VIEWS & RENDERING
+   ============================================================ */
+
+function render(){
+  renderRoleSwitch();
+  renderSidebar();
+  const v=document.getElementById("view");
+  const map={today:viewToday,queue:viewQueue,chains:viewChains,workbench:viewWorkbench,kpis:viewKpis,
+    vmap:viewVmap,capability:viewCapability,resilience:viewResilience,provenance:viewProvenance,
+    triggers:viewTriggers,connectors:viewConnectors,engines:viewEngines,settings:viewSettings};
+  v.innerHTML=(map[state.page]||viewToday)();
+}
+
+function renderRoleSwitch(){
+  const sel=document.getElementById("roleSel");
+  if(sel.options.length===0){
+    sel.innerHTML=ROLES.map(r=>`<option value="${r.key}">${r.name} · ${r.role}</option>`).join("");
+    sel.onchange=e=>switchRole(e.target.value);
+  }
+  sel.value=state.role;
+  const r=ROLES.find(x=>x.key===state.role);
+  document.getElementById("roleNote").textContent=r.focus;
+}
+
+function renderSidebar(){
+  const nb={queue:openItemsForRole().length, chains:blockedStepCount()};
+  document.getElementById("sidebar").innerHTML =
+    `<div class="nav-sec">Control surface</div>`+
+    NAV.filter(navVisible).map(n=>{
+      let badge="";
+      if(n.badge==="queue" && nb.queue>0) badge=`<span class="nav-badge">${nb.queue}</span>`;
+      if(n.badge==="chains" && nb.chains>0) badge=`<span class="nav-badge warn">${nb.chains}</span>`;
+      return `<div class="nav-item ${state.page===n.page?'active':''}" onclick="go('${n.page}')">
+        <span class="ni-ico">${n.ico}</span>${n.label}${badge}</div>`;
+    }).join("");
+}
+
+function pageHead(h,p){ return `<div class="page-head"><h1>${h}</h1><p>${p}</p></div>`; }
+
+// ---- shared component builders ----
+function engineChip(e){ return `<span class="chip ${e}">${ENGINE_LABEL[e]}</span>`; }
+function classBadge(tc){
+  const map={lead:"AI leads · spot-check",assist:"AI assists · verify vs source",excluded:"AI excluded · source-check + rationale"};
+  return `<span class="chip class-${tc}">${map[tc]}</span>`;
+}
+function ragChip(rag){ const m={green:"On track",amber:"At risk",red:"Off track"}; return `<span class="chip ${rag}"><span class="dot ${rag}"></span>${m[rag]}</span>`; }
+function provLine(p,trail){
+  return `<div class="prov">${ENGINE_LABEL[p.engine]} · ${p.model} · ${p.tokens} tok · ${p.ts}`+
+    (p.verifiedAgainst?` · <span class="verified">verified against ${p.verifiedAgainst} by human</span>`:"")+
+    (trail?`<br>trail: ${trail.join("  →  ")}`:"")+`</div>`;
+}
+
+// ---------- TODAY ----------
+function viewToday(){
+  const r=ROLES.find(x=>x.key===state.role);
+  const mine=openItemsForRole();
+  const blocked=[];
+  CHAINS.forEach(c=>c.steps.forEach(s=>{ if(s.status==="blocked") blocked.push({chain:c.name,step:s.name,note:s.note}); }));
+  // one quality signal (not throughput)
+  const avgCsat=(PROJECTS.reduce((a,p)=>a+p.csat,0)/PROJECTS.length).toFixed(1);
+  // capability/resilience red flags
+  const capFlags=CAPABILITY.filter(c=>c.riskFlag);
+  const resFlags=RESILIENCE.filter(x=>x.dependency==="critical" && !x.fallbackTested);
+  return pageHead(`Today — ${r.name}`,`${r.role}. Your queue, blocked work, one quality signal, and any capability or resilience red flags. One shared surface, filtered to you.`)
+  + `<div class="grid grid-3">
+      <div class="stat hero"><div class="label">Awaiting your verification</div><div class="value">${mine.length}</div><div class="foot">${mine.filter(i=>i.taskClass==='excluded').length} high-stakes · ${mine.filter(i=>i.taskClass==='assist').length} assist · ${mine.filter(i=>i.taskClass==='lead').length} automatable</div></div>
+      <div class="stat good"><div class="label">Quality signal — avg CSAT</div><div class="value">${avgCsat}</div><div class="foot">Portfolio-wide. Not a throughput number.</div></div>
+      <div class="stat ${blocked.length?'danger':''}"><div class="label">Blocked chain steps</div><div class="value">${blocked.length}</div><div class="foot">${blocked.length?blocked[0].step:'None right now'}</div></div>
+    </div>`
+  + `<div class="card"><h2>Waiting on you</h2><div class="card-desc">These need something only you can produce.</div>`
+    + (mine.length? mine.map(i=>`<div class="flagrow ${i.taskClass==='excluded'?'bad':'warn'}">
+        <span class="fi">${i.taskClass==='excluded'?'⛔':i.taskClass==='assist'?'✎':'✓'}</span>
+        <div style="flex:1"><div class="ft">${i.title}</div><div class="fd">${engineChipInline(i.engine)} ${classBadge(i.taskClass)}</div></div>
+        <button class="btn sm ghost" onclick="go('queue')">Open</button></div>`).join("")
+      : `<div class="empty"><div class="big">Nothing waiting on you</div><p>Your gate is clear. We won't celebrate a throughput number here — the point is verified work, not cleared work.</p></div>`)
+    + `</div>`
+  + (blocked.length? `<div class="card"><h2>Blocked chains</h2>`+blocked.map(b=>`<div class="flagrow bad"><span class="fi">⛔</span><div><div class="ft">${b.chain} — ${b.step}</div><div class="fd">${b.note}</div></div></div>`).join("")+`</div>`:"")
+  + (capFlags.length||resFlags.length? `<div class="card"><h2>Capability &amp; resilience red flags</h2>`
+      + capFlags.map(c=>`<div class="flagrow warn"><span class="fi">◑</span><div><div class="ft">${c.task}</div><div class="fd">${c.riskFlag}</div></div></div>`).join("")
+      + resFlags.map(x=>`<div class="flagrow bad"><span class="fi">⛨</span><div><div class="ft">${x.workflow} — fallback NOT tested</div><div class="fd">Critical dependency on ${x.model}; degraded mode unverified.</div></div></div>`).join("")
+      + `</div>`:"");
+}
+function engineChipInline(e){ return engineChip(e); }
+
+// ---------- VERIFICATION QUEUE ----------
+function viewQueue(){
+  const items=visibleItems();
+  const groups=[...new Set(items.map(i=>i.group))];
+  const hasLead=items.some(i=>i.taskClass==="lead");
+  let html=pageHead("Verification queue",
+    "Work advances only when you produce something the machine did not — a decision, rejection, constraint, reframing, or source-check. There is no bare “Approve”. High-stakes items require a recorded primary-source check.");
+  // filter bar
+  html+=`<div class="filterbar"><span class="fb-label">Line</span>`
+    + `<button class="fpill ${state.filters.line==='all'?'active':''}" onclick="applyFilter('line','all')">All</button>`
+    + LINES.map(l=>`<button class="fpill ${state.filters.line===l?'active':''}" onclick="applyFilter('line','${l}')">${l}</button>`).join("")
+    + `</div><div class="filterbar"><span class="fb-label">Engine</span>`
+    + `<button class="fpill eng ${state.filters.engine==='all'?'active':''}" onclick="applyFilter('engine','all')">All</button>`
+    + ENGINES.map(e=>`<button class="fpill eng ${state.filters.engine===e?'active':''}" onclick="applyFilter('engine','${e}')">${ENGINE_LABEL[e]}</button>`).join("")
+    + (hasLead?`<button class="btn sm ghost" style="margin-left:auto" onclick="batchClearLead()">Batch-clear automatable (${items.filter(i=>i.taskClass==='lead').length})</button>`:"")
+    + `</div>`;
+
+  if(!items.length){
+    return html+`<div class="empty"><div class="big">Nothing waiting on you</div><p>Your queue is clear. No throughput celebration — this space stays calm on purpose.</p></div>`;
+  }
+  groups.forEach(g=>{
+    const gi=items.filter(i=>i.group===g);
+    html+=`<div class="qgroup-title">${g} <span class="cnt">${gi.length}</span></div>`;
+    gi.forEach(i=>{ html+=queueCard(i); });
+  });
+  return html;
+}
+
+function queueCard(i){
+  const needsFrame=(i.taskClass==="assist"||i.taskClass==="excluded") && !i.frame;
+  let inner=`<div class="qmeta">${engineChip(i.engine)} ${classBadge(i.taskClass)} <span class="chip ghost">${i.line}</span>${i.flagged?'<span class="chip amber">⚑ exception</span>':''}</div>`;
+  inner+=`<h3>${i.title}</h3>`;
+  if(needsFrame){
+    // hide the machine draft until framed
+    inner+=`<div class="needs-frame"><div class="t">Frame it first</div>
+      <div class="d">This is ${i.taskClass==='excluded'?'high-stakes':'collaborative'} work. Set the brief — the question, the constraints, what good looks like — <b>before</b> you see the machine's draft. You architect the filter; you don't just review output you didn't shape.</div>
+      <button class="btn turq sm" onclick="frameItem('${i.id}')">Frame it &amp; reveal draft</button></div>`;
+  } else {
+    if(i.frame){
+      inner+=`<div class="frame-box"><div class="ttl">Your upstream frame</div>
+        <div class="row"><b>Question:</b> ${i.frame.question}</div>
+        <div class="row"><b>Constraints:</b> ${i.frame.constraints}</div>
+        <div class="row"><b>Good looks like:</b> ${i.frame.whatGoodLooksLike}</div></div>`;
+    }
+    inner+=`<div class="qbody">${i.body}</div>`;
+    if(i.caveat) inner+=`<div class="caveat">⚠ <span>${i.caveat}</span></div>`;
+    // AUDIT flags (human-classifiable; never a passing score)
+    if(i.engine==="audit" && i.auditFlags.length){
+      inner+=`<div class="audit-flags"><div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Issues surfaced — awaiting your classification (no AI verdict)</div>`;
+      i.auditFlags.forEach((f,idx)=>{
+        const st=f.status;
+        const stChip = st==="unclassified"?'<span class="aflag-status" style="background:var(--grey);color:var(--slate)">unclassified</span>':
+          st==="valid"?'<span class="aflag-status" style="background:var(--red-tint);color:var(--red)">valid issue</span>':
+          st==="addressed"?'<span class="aflag-status" style="background:var(--green-tint);color:var(--green)">addressed</span>':
+          '<span class="aflag-status" style="background:var(--grey-tint);color:var(--slate)">not an issue</span>';
+        inner+=`<div class="aflag"><div class="claim">${f.claim} ${stChip}</div>
+          <div class="src">source: ${f.source}</div>
+          <div class="fbtns">
+            <button class="tiny-btn ${st==='valid'?'on-valid':''}" onclick="classifyAuditFlag('${i.id}',${idx},'valid')">Valid issue</button>
+            <button class="tiny-btn ${st==='addressed'?'on-addressed':''}" onclick="classifyAuditFlag('${i.id}',${idx},'addressed')">Addressed</button>
+            <button class="tiny-btn ${st==='wrong'?'on-wrong':''}" onclick="classifyAuditFlag('${i.id}',${idx},'wrong')">Not an issue</button>
+          </div></div>`;
+      });
+      if(i.actions){ inner+=`<div style="font-size:12px;color:var(--ink-soft);margin-top:4px">Suggested actions: ${i.actions.map(a=>'“'+a+'”').join(" · ")}</div>`; }
+      inner+=`</div>`;
+    }
+    inner+=`<div class="routing">Suggested routing → <b>${routeLabel(i.next.to)}</b> — ${i.next.reason}</div>`;
+    inner+=provLine(i.provenance,i.trail);
+  }
+  // actions
+  let actions=``;
+  if(!needsFrame){
+    if(i.taskClass==="lead"){
+      actions=`<button class="btn turq" onclick="openGate('${i.id}')">Clear (spot-check)</button>`;
+    }else if(i.taskClass==="assist"){
+      actions=`<button class="btn primary" onclick="openGate('${i.id}')">Open verification gate</button>`;
+    }else{
+      actions=`<button class="btn danger" onclick="openGate('${i.id}')">High-stakes gate — source-check required</button>`;
+    }
+  }
+  const cls = i.taskClass==="excluded"?"excl":(i.flagged?"flagged":"");
+  return `<div class="qitem ${cls}" data-item="${i.id}">${inner}<div class="qactions">${actions}</div></div>`;
+}
+
+// ---------- PROCESS CHAINS ----------
+function viewChains(){
+  let html=pageHead("Process chains",
+    "Staged, checkpointed flow — the opposite of one-shot automation. Each chain's non-negotiable gate is highlighted. AUDIT-driven steps show surfaced issues awaiting human classification, never a passing score.");
+  CHAINS.forEach(c=>{
+    html+=`<div class="chain">
+      <div class="chain-head"><h3>${c.name}</h3><div class="chain-meta">${c.sop} · ${c.line} · ${c.instance}</div></div>
+      <div class="gate-bar"><span class="k">GATE</span> ${c.gate}</div>
+      <div class="steps">`;
+    c.steps.forEach((s,idx)=>{
+      html+=`<div class="step ${s.status}">
+        <div class="snum">Step ${idx+1}${s.engine?' · '+ENGINE_LABEL[s.engine]:''}</div>
+        <div class="sname">${s.name}</div>
+        <div class="sowner">${s.owner}</div>
+        ${s.note?`<div class="snote">${s.note}</div>`:''}
+        <span class="sstatus">${s.status==="blocked"?"● Blocked":s.status==="active"?"● Active":s.status==="done"?"✓ Done":"○ Pending"}</span>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  return html;
+}
+
+// ---------- WORKBENCH ----------
+// Workbench = amplify-the-individual path; institutional config lives here, not in the queue.
+function viewWorkbench(){
+  return pageHead("Workbench — design the worker",
+    "Where you design the filter and set the gates: the coordinator-as-“Master of Machines” posture. Change engine config here, not by rubber-stamping in the queue. Test output arrives tagged unverified — it always does.")
+  + `<div class="card"><h2>Content DRAFT engine <span class="sub">— editing configuration, not output</span></h2>
+      <div class="wb-cols">
+        <div class="wb-col">
+          <h3>Current version ${engineChip('draft')}</h3>
+          <div class="wb-field"><label>Prompt</label>
+            <textarea class="mono" id="wb-cur">You are Trinzo's content drafter. Write a LinkedIn post and matching newsletter section. Tone: confident, measured, evidence-led. Audience: regulated-industry buyers.</textarea></div>
+          <div class="wb-field"><label>Constraints</label>
+            <textarea class="mono" rows="2">No superlatives. Cite at least one proof point. Never claim regulatory outcomes we haven't delivered.</textarea></div>
+          <div class="wb-field"><label>Task class</label>
+            <select class="form"><option>assist (verify vs source)</option><option>lead</option><option>excluded</option></select></div>
+          <div class="wb-field"><label>Where are the gates?</label>
+            <textarea class="mono" rows="2">Frame-it-first; human tone + fact check before scheduling. Nothing auto-publishes.</textarea></div>
+        </div>
+        <div class="wb-col newv">
+          <h3>New draft version ${classBadge('assist')}</h3>
+          <div class="wb-field"><label>Prompt</label>
+            <textarea class="mono">You are Trinzo's content drafter. Write a LinkedIn post + newsletter section. Tone: measured, specific, no hype. BANNED words: revolutionary, game-changing, cutting-edge. Every claim must map to a named project.</textarea></div>
+          <div class="wb-field"><label>Constraints</label>
+            <textarea class="mono" rows="2">Add: flag any unproven claim inline for the human. Add: reuse house-style examples from the library.</textarea></div>
+          <div class="wb-field"><label>Task class</label>
+            <select class="form"><option>assist (verify vs source)</option><option>lead</option><option>excluded</option></select></div>
+          <div class="wb-field"><label>Where are the gates?</label>
+            <textarea class="mono" rows="2">Frame-it-first; human tone + fact check; auto-flag every superlative for the reviewer.</textarea></div>
+        </div>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" onclick="wbTest()">Test on sample</button>
+        <button class="btn ghost" onclick="toast('Version saved as draft config — not yet promoted. Institutional change, logged.')">Save as new version</button>
+      </div>
+      <div id="wb-output"></div>
+    </div>`;
+}
+function wbTest(){
+  document.getElementById("wb-output").innerHTML=
+    `<div class="wb-out"><span class="unverified-tag">Unverified — sample output</span><br>
+    "Trinzo helped a regulated medtech client cut audit-prep time on their ARIA rollout. [CLAIM FLAGGED: 'cut audit-prep time' — needs a named metric before publish.] Here's what we learned about proving compliance without slowing delivery…"<br><br>
+    <span style="color:var(--turq)">▸ 1 superlative auto-flagged · 1 unproven claim flagged for the human · nothing published.</span></div>`;
+  toast("Sample generated — tagged unverified, as all machine output is until a human shapes it.");
+}
+
+// ---------- VERIFIABILITY MAP ----------
+function viewVmap(){
+  const rulingChip=r=> r==="AI leads"?'<span class="chip green">AI leads</span>':r==="AI assists"?'<span class="chip amber">AI assists</span>':'<span class="chip red">AI excluded</span>';
+  const ck=c=> c==="high"?'<span class="chip green">high</span>':c==="medium"?'<span class="chip amber">medium</span>':'<span class="chip red">low</span>';
+  return pageHead("Verifiability map",
+    "The governing layer: point the tool only at checkable work. A task's ruling here sets the gate strength in the Verification queue — “AI leads” → quick spot-check, “AI assists” → produce a decision, “AI excluded” → rationale + primary-source check.")
+  + `<div class="card"><div class="tbl-wrap"><table>
+      <thead><tr><th>Task</th><th>Line</th><th>Checkability</th><th>Ruling</th><th>Why — and how it sets the gate</th></tr></thead>
+      <tbody>${VMAP.map(v=>`<tr>
+        <td><b>${v.task}</b></td><td>${v.line}</td><td>${ck(v.checkability)}</td><td>${rulingChip(v.ruling)}</td>
+        <td>${v.why}<br><span style="color:var(--ink-faint);font-size:11.5px">→ Sets queue gate: <b>${v.ruling==="AI leads"?"spot-check":v.ruling==="AI assists"?"decide / reject / constrain / reframe":"rationale ≥15 words + source check"}</b></span></td>
+      </tr>`).join("")}</tbody></table></div></div>`;
+}
+
+// ---------- KPIs ----------
+function viewKpis(){
+  const tabs=["Company",...LINES];
+  const t=state.kpiTab;
+  const avgCsat=(PROJECTS.reduce((a,p)=>a+p.csat,0)/PROJECTS.length).toFixed(1);
+  const totalCleared=ITEMS.filter(i=>i.status!=="open").length + 205;
+  const totalMins=ITEMS.reduce((a,i)=>a+i.minsSaved,0)+1240;
+  let html=pageHead("KPIs & reports",
+    "Verified quality is the hero. Throughput (minutes saved, items cleared) is deliberately demoted — it measures movement, not value. A gate nobody fails isn't a gate, so reviewer integrity is tracked here too.");
+  html+=`<div class="tabs">`+tabs.map(x=>`<button class="tab ${t===x?'active':''}" onclick="kpiTab('${x}')">${x}</button>`).join("")+`</div>`;
+  // HERO tiles
+  html+=`<div class="grid grid-4">
+    <div class="stat hero"><div class="label">Avg CSAT</div><div class="value">${avgCsat}</div><div class="foot">Verified quality — the number that matters</div></div>
+    <div class="stat hero"><div class="label">Caught before client</div><div class="value">27</div><div class="foot">Issues stopped at the gate this month</div></div>
+    <div class="stat hero"><div class="label">Corrections applied</div><div class="value">${CORRECTIONS.length}</div><div class="foot">Each one feeds prompt/process learning</div></div>
+    <div class="stat hero"><div class="label">Rework incidents</div><div class="value">3</div><div class="foot">Down from 8 last month</div></div>
+  </div>`;
+  // RAG panel
+  html+=`<div class="card"><h2>Project RAG &amp; CSAT</h2><div class="card-desc">Human-owned status calls. The Audit Tool is red and past SLA — surfaced plainly, not softened.</div>
+    <div class="grid grid-4">`+PROJECTS.map(p=>`<div class="stat ${p.rag==='red'?'danger':p.rag==='green'?'good':''}">
+      <div class="label">${p.name}</div><div class="value small">${ragChip(p.rag)}</div>
+      <div class="foot">CSAT ${p.csat} · ${p.sla}<br>${p.note}</div></div>`).join("")+`</div></div>`;
+  // RUBBER-STAMP DETECTOR
+  const flagged=ADOPTION.filter(a=>a.flag);
+  html+=`<div class="card"><h2>Rubber-stamp detector <span class="sub">— gate integrity, not productivity</span></h2>
+    <div class="card-desc">A gate nobody fails isn't a gate. This flags reviewers who never reject, clear implausibly fast, or let queues age. It is a check on the <b>method</b>, not a ranking of people.</div>`;
+  if(flagged.length){ flagged.forEach(a=>{ html+=`<div class="flagrow bad"><span class="fi">⚑</span><div><div class="ft">${a.person}</div><div class="fd">${a.flag}</div></div></div>`; }); }
+  else html+=`<div class="flagrow ok"><span class="fi">✓</span><div><div class="ft">No integrity flags right now</div><div class="fd">Reject rates and clear-times are within plausible bounds.</div></div></div>`;
+  html+=`<div class="tbl-wrap" style="margin-top:12px"><table>
+    <thead><tr><th>Reviewer</th><th>Cleared</th><th>Avg clear time</th><th>Reject rate</th><th>Oldest in queue</th><th>Integrity</th></tr></thead>
+    <tbody>`+ADOPTION.map(a=>`<tr>
+      <td><b>${a.person}</b></td><td>${a.cleared}</td>
+      <td class="${a.avgClearMins<2?'':''}" style="${a.avgClearMins<2?'color:var(--red);font-weight:700':''}">${a.avgClearMins} min</td>
+      <td style="${a.rejectRate<0.03?'color:var(--red);font-weight:700':''}">${Math.round(a.rejectRate*100)}%</td>
+      <td style="${a.oldestQueueMins>480?'color:var(--amber);font-weight:700':''}">${a.oldestQueueMins>=60?Math.round(a.oldestQueueMins/60)+'h':a.oldestQueueMins+'m'}</td>
+      <td>${a.flag?'<span class="chip red">flagged</span>':'<span class="chip green">ok</span>'}</td></tr>`).join("")+`</tbody></table></div></div>`;
+  // Agent stats + secondary throughput
+  html+=`<div class="grid grid-2">
+    <div class="card"><h2>Agent stats</h2><div class="tbl-wrap"><table>
+      <thead><tr><th>Agent</th><th>Runs</th><th>Success</th><th>Exceptions</th></tr></thead>
+      <tbody>`+AGENTSTATS.map(a=>`<tr><td>${a.agent}</td><td>${a.runs}</td><td>${a.successPct}%</td><td>${a.exceptions}</td></tr>`).join("")+`</tbody></table></div>
+      <div style="font-size:11.5px;color:var(--ink-faint);margin-top:8px">Incl. EI Grant Tracker: 7 runs, 86%, 1 missing evidence.</div></div>
+    <div class="card"><h2>Throughput <span class="sub">— secondary, on purpose</span></h2>
+      <div class="grid grid-2">
+        <div class="stat secondary"><div class="label">Items cleared</div><div class="value">${totalCleared}</div><div class="foot">movement, not value</div></div>
+        <div class="stat secondary"><div class="label">Minutes saved</div><div class="value">${totalMins}</div><div class="foot">tracked, never the hero</div></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--ink-faint);margin-top:8px">Deliberately quieter than the quality tiles above.</div></div>
+  </div>`;
+  // EI evidence log
+  html+=`<div class="card"><h2>EI / R&amp;D evidence log <span class="sub">— two-signer, evidence-URL required</span></h2>
+    <div class="tbl-wrap"><table><thead><tr><th>Work package</th><th>Evidence URL</th><th>Signer 1</th><th>Signer 2 (PI)</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>WP1 — model R&amp;D</td><td>sharepoint/…/wp1-log</td><td>Liam ✓</td><td>Adelin ✓</td><td><span class="chip green">complete</span></td></tr>
+      <tr><td>WP4 — novelty statement</td><td style="color:var(--red)">(missing)</td><td>—</td><td>—</td><td><span class="chip red">blocked — no source</span></td></tr>
+      <tr><td>Expenditure recon (batch 2)</td><td>pending review</td><td>Liam (in queue)</td><td>—</td><td><span class="chip amber">in verification</span></td></tr>
+    </tbody></table></div></div>`;
+  return html;
+}
+
+// ---------- CAPABILITY ----------
+function viewCapability(){
+  return pageHead("Capability & apprenticeship",
+    "Protect the skill the method consumes. Track who can still do each task unassisted, catch single points of knowledge and stale skills, and route verification work to juniors as deliberate development — not throughput.")
+  + `<div class="card"><h2>Who can still do it unassisted</h2>
+      <div class="tbl-wrap"><table><thead><tr><th>Critical task</th><th>Unassisted-capable</th><th>Last done unassisted</th><th>Risk</th></tr></thead>
+      <tbody>`+CAPABILITY.map(c=>`<tr>
+        <td><b>${c.task}</b></td><td>${c.unassistedCapable.join(", ")}</td><td>${c.lastUnassisted}</td>
+        <td>${c.riskFlag?`<span class="chip red">⚑ ${c.riskFlag}</span>`:'<span class="chip green">healthy</span>'}</td></tr>`).join("")+`</tbody></table></div></div>`
+  + `<div class="grid grid-2">
+      <div class="card"><h2>Reconstruction schedule</h2><div class="card-desc">Deliberate unassisted practice runs to keep judgement sharp.</div>
+        `+RECON_SCHEDULE.map(r=>`<div class="flagrow warn"><span class="fi">◑</span><div><div class="ft">${r.task}</div><div class="fd"><b>${r.who}</b> · ${r.when} — ${r.reason}</div></div></div>`).join("")+`</div>
+      <div class="card"><h2>Apprenticeship</h2><div class="card-desc">Verification &amp; source-tracing routed to juniors, tracked as development — not counted as throughput.</div>
+        `+APPRENTICESHIP.map(a=>`<div class="flagrow ok"><span class="fi">↗</span><div><div class="ft">${a.task} — ${a.junior}</div><div class="fd">${a.tracked} · ${a.note}</div></div></div>`).join("")+`</div>
+    </div>`;
+}
+
+// ---------- RESILIENCE ----------
+function viewResilience(){
+  const dep=d=> d==="critical"?'<span class="chip red">critical</span>':d==="moderate"?'<span class="chip amber">moderate</span>':'<span class="chip green">low</span>';
+  return pageHead("Resilience",
+    "Map model dependency and test the degraded mode before you need it.")
+  + `<div class="card" style="background:var(--navy);color:#fff;border:none">
+      <div style="font-size:16px;font-weight:700;color:#fff">“The cheapest durable redundancy is people who still know how to do the work.”</div></div>`
+  + `<div class="card"><div class="tbl-wrap"><table>
+      <thead><tr><th>Workflow</th><th>Model</th><th>Dependency</th><th>Defined fallback</th><th>Fallback tested?</th></tr></thead>
+      <tbody>`+RESILIENCE.map(r=>`<tr>
+        <td><b>${r.workflow}</b></td><td>${r.model}</td><td>${dep(r.dependency)}</td><td>${r.fallback}</td>
+        <td>${r.fallbackTested?'<span class="chip green">✓ tested</span>':'<span class="chip red">✗ NOT tested</span>'}</td></tr>`).join("")+`</tbody></table></div>
+      <div style="margin-top:10px;font-size:12.5px;color:var(--ink-soft)">Two critical workflows have untested fallbacks — the highest-priority resilience gap. Both name people as the fallback, which is the durable one.</div></div>`;
+}
+
+// ---------- PROVENANCE & COST ----------
+function viewProvenance(){
+  let html=pageHead("Provenance & cost",
+    "Every AI artefact carries its provenance. Corrections are captured as institutional learning (informate, don't just automate), handoffs are logged, and cost is shown for transparency — not as a performance leaderboard.");
+  // Corrections
+  html+=`<div class="card"><h2>Corrections log <span class="sub">— informate, not just automate</span></h2>
+    <div class="card-desc">Who changed what, and the patterns worth acting on.</div>
+    <div class="flagrow warn"><span class="fi">◆</span><div><div class="ft">Pattern detected</div><div class="fd">“revolutionary” softened — <b>third occurrence this month</b>: candidate for a prompt update in the Workbench.</div></div></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table><thead><tr><th>Date</th><th>Agent</th><th>Change</th><th>By</th><th>Detail</th></tr></thead>
+    <tbody>`+CORRECTIONS.map(c=>`<tr><td>${c.date}</td><td>${c.agent}</td><td>${c.type}</td><td>${c.by}</td><td>${c.detail}</td></tr>`).join("")+`</tbody></table></div></div>`;
+  // Handoffs
+  html+=`<div class="card"><h2>Handoffs log</h2>
+    <div class="tbl-wrap"><table><thead><tr><th>When</th><th>From</th><th>To</th><th>Item</th><th>Outcome</th></tr></thead>
+    <tbody>`+HANDOFFS.map(h=>`<tr><td>${h.date}</td><td>${h.from}</td><td>${h.to}</td><td>${h.item}</td><td>${h.outcome}</td></tr>`).join("")+`</tbody></table></div></div>`;
+  // Cost + model mix
+  html+=`<div class="grid grid-2">
+    <div class="card"><h2>Token / cost by engine</h2><div class="tbl-wrap"><table>
+      <thead><tr><th>Engine</th><th>Model</th><th>Tokens (mo)</th><th>Est. cost</th></tr></thead><tbody>
+      <tr><td>${engineChip('extract')}</td><td>Haiku</td><td>142k</td><td>€3.10</td></tr>
+      <tr><td>${engineChip('draft')}</td><td>Sonnet</td><td>318k</td><td>€28.40</td></tr>
+      <tr><td>${engineChip('audit')}</td><td>Sonnet</td><td>206k</td><td>€18.20</td></tr>
+      <tr><td>${engineChip('retrieve')}</td><td>Sonnet</td><td>174k</td><td>€15.60</td></tr>
+      </tbody></table></div><div style="font-size:11.5px;color:var(--ink-faint);margin-top:8px">Cost transparency — not a leaderboard.</div></div>
+    <div class="card"><h2>Model mix</h2>
+      <div class="wb-field"><label>Haiku (cheap, high-volume)</label><div class="pbar"><span style="width:34%"></span></div></div>
+      <div class="wb-field"><label>Sonnet (default reasoning)</label><div class="pbar navy"><span style="width:58%"></span></div></div>
+      <div class="wb-field"><label>Opus (hardest / regulated)</label><div class="pbar"><span style="width:8%;background:var(--amber)"></span></div></div>
+      <div style="font-size:11.5px;color:var(--ink-faint)">Right-sized per task, per the Verifiability map.</div></div>
+  </div>`;
+  return html;
+}
+
+// ---------- TRIGGERS ----------
+function viewTriggers(){
+  const dotFor=s=> s==="live"?'<span class="dot green"></span>Live':s==="scheduled"?'<span class="dot turq"></span>Scheduled':s==="manual"?'<span class="dot grey"></span>Manual':'<span class="dot amber pulse"></span>In-flight';
+  return pageHead("Workflows & triggers",
+    "Every trigger states its human checkpoint. None auto-publish — cascades queue work for a person, they don't act on their own.")
+  + `<div class="card">`+SURVEYS.map(s=>`<div class="conn-row" style="align-items:flex-start">
+      <div style="min-width:150px">${dotFor(s.status)}</div>
+      <div style="flex:1"><div style="font-weight:700;color:var(--ink)">${s.name} <span style="font-weight:400;color:var(--ink-faint);font-size:12px">· ${s.cadence}</span></div>
+        <div style="font-size:12.5px;color:var(--ink-soft);margin-top:3px"><b>Human checkpoint:</b> ${s.checkpoint}</div>
+        <div style="font-size:12px;color:var(--ink-faint);margin-top:2px">Cascade: ${s.cascade}</div></div>
+      <button class="btn sm ghost" onclick="fireTrigger('${s.id}')" ${s.status==='in-flight'?'disabled':''}>Fire (simulate)</button>
+    </div>`).join("")+`</div>`;
+}
+
+// ---------- CONNECTORS ----------
+function viewConnectors(){
+  const dot=s=>`<span class="dot ${s}"></span>`;
+  return pageHead("SaaS connectors",
+    "Connection health and read/write direction across the stack.")
+  + `<div class="card">`+CONNECTORS.map(c=>`<div class="conn-row">
+      ${dot(c.status)}<span class="cn">${c.name}</span>
+      <span style="font-size:12px;color:var(--ink-soft)">${c.status==='green'?'Connected':'Degraded'}</span>
+      <span class="cdir">${c.dir}</span></div>`).join("")+`</div>`;
+}
+
+// ---------- ENGINE CONFIG ----------
+function viewEngines(){
+  return pageHead("Engine configuration",
+    "Per-engine settings and default task classes. Rulings that decide gate strength live in the Verifiability map — this page defers to it.")
+  + `<div class="card"><div class="flagrow ok"><span class="fi">◈</span><div><div class="ft">Default task classes derive from the Verifiability map</div><div class="fd"><button class="btn sm ghost" onclick="go('vmap')">Open Verifiability map →</button></div></div></div>
+    <div class="tbl-wrap" style="margin-top:10px"><table><thead><tr><th>Engine</th><th>Purpose</th><th>Default class</th><th>Model</th><th>Gates</th></tr></thead>
+    <tbody>`+ENGINE_CONFIG.map(e=>`<tr><td>${engineChip(e.engine)}</td><td>${e.desc}</td><td>${classBadge(e.defClass)}</td><td>${e.model}</td><td>${e.gates}</td></tr>`).join("")+`</tbody></table></div></div>`;
+}
+
+// ---------- SETTINGS ----------
+function viewSettings(){
+  const rows=[
+    ["Margin floor",SETTINGS.marginFloor],
+    ["Proposal SLA",SETTINGS.slaProposal],
+    ["Pre-sales SLA",SETTINGS.slaPresales],
+    ["Gate default — AI-led",SETTINGS.gateDefaultLead],
+    ["Gate default — AI-assist",SETTINGS.gateDefaultAssist],
+    ["Gate default — AI-excluded",SETTINGS.gateDefaultExcluded],
+    ["Rubber-stamp: min reject rate",SETTINGS.rubberStampMinReject],
+    ["Rubber-stamp: min clear time",SETTINGS.rubberStampMinMins],
+    ["Queue-age alert",SETTINGS.queueAgeAlert]
+  ];
+  return pageHead("Settings & rules",
+    "Thresholds that govern the surface. The gate-strength and rubber-stamp defaults are load-bearing — they are why a gate can actually be failed.")
+  + `<div class="card"><div class="tbl-wrap"><table><thead><tr><th>Setting</th><th>Value</th></tr></thead>
+    <tbody>`+rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td></tr>`).join("")+`</tbody></table></div>
+    <div style="font-size:12px;color:var(--ink-faint);margin-top:10px">Exec plan targets — Revenue ${EXECPLAN[0].target} (${EXECPLAN[0].progressPct}%), Margin ${EXECPLAN[1].target} (${EXECPLAN[1].progressPct}%).</div></div>`;
+}
+
+// ---- init ----
+recomputeStampFlags();
+render();
+// keep exec plan referenced for role-specific extension without dead-code warnings
+if(state.role==="exec"){ /* exec plan surfaced in Today/settings */ }
+</script>
+</body>
+</html>
